@@ -1,0 +1,75 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Inspection ID} as integer,",
+				"          {DBA Name} as string,",
+				"          {AKA Name} as string,",
+				"          {License #} as double,",
+				"          {Facility Type} as string,",
+				"          Risk as string,",
+				"          Address as string,",
+				"          City as string,",
+				"          State as string,",
+				"          Zip as double,",
+				"          {Inspection Date} as date,",
+				"          {Inspection Type} as string,",
+				"          Results as string,",
+				"          Violations as string,",
+				"          Latitude as string,",
+				"          Longitude as string,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"select1 derive(Zip = toString(toInteger(Zip)),",
+				"          License_no = toString(toInteger(License_no)),",
+				"          DBA_Name = iif(isNull(DBA_Name), \"Unknown\", DBA_Name),",
+				"          Violations = iif(isNull(Violations), \"Unknown\", Violations)) ~> derivedColumn1",
+				"source1 select(mapColumn(",
+				"          Inspection_ID = {Inspection ID},",
+				"          DBA_Name = {DBA Name},",
+				"          AKA_Name = {AKA Name},",
+				"          License_no = {License #},",
+				"          Facility_Type = {Facility Type},",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date = {Inspection Date},",
+				"          {Inspection _Type} = {Inspection Type},",
+				"          Results,",
+				"          Violations,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1"
+			]
+		}
+	}
+}
