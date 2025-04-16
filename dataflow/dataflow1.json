@@ -19,6 +19,27 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "flatten2"
+				},
+				{
+					"name": "flatten3"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
 				}
 			],
 			"scriptLines": [
@@ -47,7 +68,7 @@
 				"select1 derive(Zip = toString(toInteger(Zip)),",
 				"          License_no = toString(toInteger(License_no)),",
 				"          DBA_Name = iif(isNull(DBA_Name), \"Unknown\", DBA_Name),",
-				"          Violations = iif(isNull(Violations), \"Unknown\", Violations)) ~> derivedColumn1",
+				"          Violations = split(Violations, '|')) ~> derivedColumn1",
 				"source1 select(mapColumn(",
 				"          Inspection_ID = {Inspection ID},",
 				"          DBA_Name = {DBA Name},",
@@ -68,7 +89,58 @@
 				"          Location",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"flatten2 keyGenerate(output(rowid as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"flatten3 derive(violation_part = split(Violations, ' - Comments: ')) ~> derivedColumn2",
+				"derivedColumn5 foldDown(unroll(Violations),",
+				"     mapColumn(",
+				"          Inspection_ID,",
+				"          DBA_Name,",
+				"          AKA_Name,",
+				"          License_no,",
+				"          Facility_Type,",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date,",
+				"          {Inspection _Type},",
+				"          Results,",
+				"          Violations = violation_code,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten2",
+				"derivedColumn1 foldDown(unroll(Violations),",
+				"     mapColumn(",
+				"          Inspection_ID,",
+				"          DBA_Name,",
+				"          AKA_Name,",
+				"          License_no,",
+				"          Facility_Type,",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date,",
+				"          {Inspection _Type},",
+				"          Results,",
+				"          Violations,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten3",
+				"derivedColumn2 derive(violation_desc = violation_part[1]) ~> derivedColumn3",
+				"derivedColumn3 derive(comments = iif(size(violation_part) > 1, violation_part[2], '')) ~> derivedColumn4",
+				"derivedColumn4 derive(violation_code = regexExtract(violation_desc, '^(\\\\d+)\\\\.', 1)) ~> derivedColumn5"
 			]
 		}
 	}
