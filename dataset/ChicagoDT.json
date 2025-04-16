@@ -1,0 +1,92 @@
+{
+	"name": "ChicagoDT",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Chicago.csv",
+				"fileSystem": "bronze"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Inspection ID",
+				"type": "String"
+			},
+			{
+				"name": "DBA Name",
+				"type": "String"
+			},
+			{
+				"name": "AKA Name",
+				"type": "String"
+			},
+			{
+				"name": "License #",
+				"type": "String"
+			},
+			{
+				"name": "Facility Type",
+				"type": "String"
+			},
+			{
+				"name": "Risk",
+				"type": "String"
+			},
+			{
+				"name": "Address",
+				"type": "String"
+			},
+			{
+				"name": "City",
+				"type": "String"
+			},
+			{
+				"name": "State",
+				"type": "String"
+			},
+			{
+				"name": "Zip",
+				"type": "String"
+			},
+			{
+				"name": "Inspection Date",
+				"type": "String"
+			},
+			{
+				"name": "Inspection Type",
+				"type": "String"
+			},
+			{
+				"name": "Results",
+				"type": "String"
+			},
+			{
+				"name": "Violations",
+				"type": "String"
+			},
+			{
+				"name": "Latitude",
+				"type": "String"
+			},
+			{
+				"name": "Longitude",
+				"type": "String"
+			},
+			{
+				"name": "Location",
+				"type": "String"
+			}
+		]
+	}
+}

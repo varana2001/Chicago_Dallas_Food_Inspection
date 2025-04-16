@@ -1,0 +1,154 @@
+{
+	"name": "ChicagoDF",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ChicagoDT",
+						"type": "DatasetReference"
+					},
+					"name": "chicagodt"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "flatten1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "flatten2"
+				},
+				{
+					"name": "surrogateKey1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Inspection ID} as string,",
+				"          {DBA Name} as string,",
+				"          {AKA Name} as string,",
+				"          {License #} as string,",
+				"          {Facility Type} as string,",
+				"          Risk as string,",
+				"          Address as string,",
+				"          City as string,",
+				"          State as string,",
+				"          Zip as string,",
+				"          {Inspection Date} as string,",
+				"          {Inspection Type} as string,",
+				"          Results as string,",
+				"          Violations as string,",
+				"          Latitude as string,",
+				"          Longitude as string,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> chicagodt",
+				"chicagodt select(mapColumn(",
+				"          Inspection_ID = {Inspection ID},",
+				"          DBA_Name = {DBA Name},",
+				"          AKA_Name = {AKA Name},",
+				"          License_No = {License #},",
+				"          Facility_Type = {Facility Type},",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date = {Inspection Date},",
+				"          Inspection_Type = {Inspection Type},",
+				"          Results,",
+				"          Violations,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(Zip = (toInteger(Zip)),",
+				"          License_No = (toInteger(License_No)),",
+				"          DBA_Name = iif(isNull(DBA_Name),\"Unknown\",DBA_Name),",
+				"          Latitude = toFloat(Latitude),",
+				"          Violations = split(Violations,\"|\"),",
+				"          Longitude = toFloat(Latitude),",
+				"          Inspection_ID = toInteger(Inspection_ID)) ~> derivedColumn1",
+				"derivedColumn1 foldDown(unroll(Violations),",
+				"     mapColumn(",
+				"          Inspection_ID,",
+				"          DBA_Name,",
+				"          AKA_Name,",
+				"          License_No,",
+				"          Facility_Type,",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date,",
+				"          Inspection_Type,",
+				"          Results,",
+				"          Violations,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 derive(Violation_Part = split(Violations, ' - Comments: ')) ~> derivedColumn2",
+				"derivedColumn2 derive(Violation_Desc = Violation_Part[1]) ~> derivedColumn3",
+				"derivedColumn3 derive(Comments = iif(size(Violation_Part) > 1, Violation_Part[2], '')) ~> derivedColumn4",
+				"derivedColumn4 derive(Violation_Code = regexExtract(Violation_Desc, '^(\\\\d+)\\\\.', 1)) ~> derivedColumn5",
+				"derivedColumn5 foldDown(unroll(Violation_Part),",
+				"     mapColumn(",
+				"          Inspection_ID,",
+				"          DBA_Name,",
+				"          AKA_Name,",
+				"          License_No,",
+				"          Facility_Type,",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date,",
+				"          Inspection_Type,",
+				"          Results,",
+				"          Violations = Violation_Code,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location,",
+				"          Violation_Part,",
+				"          Violation_Desc,",
+				"          Comments,",
+				"          Violation_Code",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten2",
+				"flatten2 keyGenerate(output(Row_ID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1"
+			]
+		}
+	}
+}
