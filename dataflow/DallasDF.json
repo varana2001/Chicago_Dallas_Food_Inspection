@@ -1,0 +1,85 @@
+{
+	"name": "DallasDF",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dallasFinalcsv",
+						"type": "DatasetReference"
+					},
+					"name": "DallasDF1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Restaurant Name} as string,",
+				"          {Inspection Type} as string,",
+				"          {Inspection Date} as string,",
+				"          {Inspection Score} as string,",
+				"          {Street Number} as string,",
+				"          {Street Name} as string,",
+				"          {Street Direction} as string,",
+				"          {Street Type} as string,",
+				"          {Street Unit} as string,",
+				"          {Street Address} as string,",
+				"          {Zip Code} as string,",
+				"          {Inspection Month} as string,",
+				"          {Inspection Year} as string,",
+				"          LatLongLocation as string,",
+				"          Violations as string,",
+				"          Comment as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> DallasDF1",
+				"select1 derive(RestaurantName = iif(isNull(RestaurantName), \"None\", RestaurantName),",
+				"          InspectionType = iif(isNull(InspectionType), \"None\", InspectionType),",
+				"          InspectionDate = iif(isNull(InspectionDate), \"None\", InspectionDate),",
+				"          InspectionScore = iif(isNull(InspectionScore), \"None\", InspectionScore),",
+				"          StreetNumber = iif(isNull(StreetNumber), \"None\", StreetNumber),",
+				"          StreetName = iif(isNull(StreetName), \"None\", StreetName),",
+				"          StreetDirection = iif(isNull(StreetDirection), \"None\", StreetDirection),",
+				"          StreetType = iif(isNull(StreetType), \"None\", StreetType),",
+				"          StreetUnit = iif(isNull(StreetUnit), \"None\", StreetUnit),",
+				"          StreetAddress = iif(isNull(StreetAddress), \"None\", StreetAddress),",
+				"          ZipCode = iif(isNull(ZipCode), \"None\", ZipCode),",
+				"          InspectionMonth = iif(isNull(InspectionMonth), \"None\", InspectionMonth),",
+				"          InspectionYear = iif(isNull(InspectionYear), \"None\", InspectionYear),",
+				"          LatLongLocation = iif(isNull(LatLongLocation), \"None\", LatLongLocation),",
+				"          Violations = iif(isNull(Violations), \"None\", Violations),",
+				"          Comment = iif(isNull(Comment), \"None\", Comment)) ~> derivedColumn1",
+				"DallasDF1 select(mapColumn(",
+				"          RestaurantName = {Restaurant Name},",
+				"          InspectionType = {Inspection Type},",
+				"          InspectionDate = {Inspection Date},",
+				"          InspectionScore = {Inspection Score},",
+				"          StreetNumber = {Street Number},",
+				"          StreetName = {Street Name},",
+				"          StreetDirection = {Street Direction},",
+				"          StreetType = {Street Type},",
+				"          StreetUnit = {Street Unit},",
+				"          StreetAddress = {Street Address},",
+				"          ZipCode = {Zip Code},",
+				"          InspectionMonth = {Inspection Month},",
+				"          InspectionYear = {Inspection Year},",
+				"          LatLongLocation,",
+				"          Violations,",
+				"          Comment",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1"
+			]
+		}
+	}
+}
