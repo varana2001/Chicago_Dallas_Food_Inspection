@@ -1,12 +1,12 @@
 {
-	"name": "dataflow1",
+	"name": "chicago_dataflow",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText1",
+						"referenceName": "chicago_dataset",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -15,46 +15,43 @@
 			"sinks": [],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
+					"name": "splitandtoint"
 				},
 				{
-					"name": "select1"
+					"name": "RowIDSK"
 				},
 				{
-					"name": "surrogateKey1"
+					"name": "Violationsdescandcomments"
 				},
 				{
-					"name": "derivedColumn2"
+					"name": "FlatteningViolations"
 				},
 				{
-					"name": "flatten2"
+					"name": "violationdesc"
 				},
 				{
-					"name": "flatten3"
+					"name": "comments"
 				},
 				{
-					"name": "derivedColumn3"
+					"name": "ViolationCode"
 				},
 				{
-					"name": "derivedColumn4"
-				},
-				{
-					"name": "derivedColumn5"
+					"name": "RenamingColumns"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
-				"          {Inspection ID} as integer,",
+				"          {Inspection ID} as string,",
 				"          {DBA Name} as string,",
 				"          {AKA Name} as string,",
-				"          {License #} as double,",
+				"          {License #} as string,",
 				"          {Facility Type} as string,",
 				"          Risk as string,",
 				"          Address as string,",
 				"          City as string,",
 				"          State as string,",
-				"          Zip as double,",
-				"          {Inspection Date} as date,",
+				"          Zip as string,",
+				"          {Inspection Date} as string,",
 				"          {Inspection Type} as string,",
 				"          Results as string,",
 				"          Violations as string,",
@@ -65,15 +62,45 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"select1 derive(Zip = toString(toInteger(Zip)),",
-				"          License_no = toString(toInteger(License_no)),",
+				"RenamingColumns derive(Zip = toInteger(Zip),",
+				"          License_no = toInteger(License_number),",
 				"          DBA_Name = iif(isNull(DBA_Name), \"Unknown\", DBA_Name),",
-				"          Violations = split(Violations, '|')) ~> derivedColumn1",
+				"          Violations = split(Violations, '|')) ~> splitandtoint",
+				"ViolationCode keyGenerate(output(rowid as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> RowIDSK",
+				"FlatteningViolations derive(violation_part = split(Violations, ' - Comments: ')) ~> Violationsdescandcomments",
+				"splitandtoint foldDown(unroll(Violations),",
+				"     mapColumn(",
+				"          Inspection_ID,",
+				"          DBA_Name,",
+				"          AKA_Name,",
+				"          License_no,",
+				"          Facility_Type,",
+				"          Risk,",
+				"          Address,",
+				"          City,",
+				"          State,",
+				"          Zip,",
+				"          Inspection_Date,",
+				"          {Inspection _Type} = Inspection_Type,",
+				"          Results,",
+				"          Violations,",
+				"          Latitude,",
+				"          Longitude,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> FlatteningViolations",
+				"Violationsdescandcomments derive(violation_desc = violation_part[1]) ~> violationdesc",
+				"violationdesc derive(comments = iif(size(violation_part) > 1, violation_part[2], '')) ~> comments",
+				"comments derive(violation_code = toInteger(trim(regexExtract(violation_desc, '^\\\\s*(\\\\d+)', 1)))\r",
+				") ~> ViolationCode",
 				"source1 select(mapColumn(",
 				"          Inspection_ID = {Inspection ID},",
 				"          DBA_Name = {DBA Name},",
 				"          AKA_Name = {AKA Name},",
-				"          License_no = {License #},",
+				"          License_number = {License #},",
 				"          Facility_Type = {Facility Type},",
 				"          Risk,",
 				"          Address,",
@@ -81,7 +108,7 @@
 				"          State,",
 				"          Zip,",
 				"          Inspection_Date = {Inspection Date},",
-				"          {Inspection _Type} = {Inspection Type},",
+				"          Inspection_Type = {Inspection Type},",
 				"          Results,",
 				"          Violations,",
 				"          Latitude,",
@@ -89,58 +116,7 @@
 				"          Location",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"flatten2 keyGenerate(output(rowid as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"flatten3 derive(violation_part = split(Violations, ' - Comments: ')) ~> derivedColumn2",
-				"derivedColumn5 foldDown(unroll(Violations),",
-				"     mapColumn(",
-				"          Inspection_ID,",
-				"          DBA_Name,",
-				"          AKA_Name,",
-				"          License_no,",
-				"          Facility_Type,",
-				"          Risk,",
-				"          Address,",
-				"          City,",
-				"          State,",
-				"          Zip,",
-				"          Inspection_Date,",
-				"          {Inspection _Type},",
-				"          Results,",
-				"          Violations = violation_code,",
-				"          Latitude,",
-				"          Longitude,",
-				"          Location",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten2",
-				"derivedColumn1 foldDown(unroll(Violations),",
-				"     mapColumn(",
-				"          Inspection_ID,",
-				"          DBA_Name,",
-				"          AKA_Name,",
-				"          License_no,",
-				"          Facility_Type,",
-				"          Risk,",
-				"          Address,",
-				"          City,",
-				"          State,",
-				"          Zip,",
-				"          Inspection_Date,",
-				"          {Inspection _Type},",
-				"          Results,",
-				"          Violations,",
-				"          Latitude,",
-				"          Longitude,",
-				"          Location",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten3",
-				"derivedColumn2 derive(violation_desc = violation_part[1]) ~> derivedColumn3",
-				"derivedColumn3 derive(comments = iif(size(violation_part) > 1, violation_part[2], '')) ~> derivedColumn4",
-				"derivedColumn4 derive(violation_code = regexExtract(violation_desc, '^(\\\\d+)\\\\.', 1)) ~> derivedColumn5"
+				"     skipDuplicateMapOutputs: true) ~> RenamingColumns"
 			]
 		}
 	}
