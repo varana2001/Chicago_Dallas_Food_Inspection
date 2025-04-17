@@ -12,7 +12,15 @@
 					"name": "DallasDF1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DALLAS_STG",
+						"type": "DatasetReference"
+					},
+					"name": "dallassink"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
@@ -78,7 +86,55 @@
 				"          Comment",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          RESTAURANTNAME as string,",
+				"          INSPECTIONTYPE as string,",
+				"          INSPECTIONDATE as string,",
+				"          INSPECTIONSCORE as string,",
+				"          STREETNUMBER as string,",
+				"          STREETNAME as string,",
+				"          STREETDIRECTION as string,",
+				"          STREETTYPE as string,",
+				"          STREETUNIT as string,",
+				"          STREETADDRESS as string,",
+				"          ZIPCODE as string,",
+				"          INSPECTIONMONTH as string,",
+				"          INSPECTIONYEAR as string,",
+				"          LATLONGLOCATION as string,",
+				"          VIOLATIONS as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          RESTAURANTNAME = RestaurantName,",
+				"          INSPECTIONTYPE = InspectionType,",
+				"          INSPECTIONDATE = InspectionDate,",
+				"          INSPECTIONSCORE = InspectionScore,",
+				"          STREETNUMBER = StreetNumber,",
+				"          STREETNAME = StreetName,",
+				"          STREETDIRECTION = StreetDirection,",
+				"          STREETTYPE = StreetType,",
+				"          STREETUNIT = StreetUnit,",
+				"          STREETADDRESS = StreetAddress,",
+				"          ZIPCODE = ZipCode,",
+				"          INSPECTIONMONTH = InspectionMonth,",
+				"          INSPECTIONYEAR = InspectionYear,",
+				"          LATLONGLOCATION = LatLongLocation,",
+				"          VIOLATIONS = Violations,",
+				"          COMMENTS = Comment",
+				"     )) ~> dallassink"
 			]
 		}
 	}
