@@ -13,26 +13,30 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "select1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
-				"          RecordID as string,",
+				"          RecordID as integer,",
 				"          {Restaurant Name} as string,",
 				"          {Inspection Type} as string,",
-				"          {Inspection Date} as string,",
-				"          {Inspection Score} as string,",
-				"          {Street Number} as string,",
+				"          {Inspection Date} as date,",
+				"          {Inspection Score} as short,",
+				"          {Street Number} as short,",
 				"          {Street Name} as string,",
 				"          {Street Direction} as string,",
 				"          {Street Type} as string,",
 				"          {Street Unit} as string,",
 				"          {Street Address} as string,",
-				"          {Zip Code} as string,",
+				"          {Zip Code} as integer,",
 				"          {Inspection Month} as string,",
 				"          {Inspection Year} as string,",
 				"          {Lat Long Location} as string,",
 				"          Clean_Restaurant_Name as string,",
-				"          IsCoordinateRow as string,",
+				"          IsCoordinateRow as boolean,",
 				"          LatLongLocation as string,",
 				"          Name as string,",
 				"          Value as string,",
@@ -40,7 +44,19 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> DallasSource"
+				"     ignoreNoFilesFound: false) ~> DallasSource",
+				"DallasSource select(mapColumn(",
+				"          ADDRESS = {Street Address},",
+				"          ZIP = {Zip Code},",
+				"          LOCATION = LatLongLocation,",
+				"          STREET_NUMBER = {Street Number},",
+				"          STREET_NAME = {Street Name},",
+				"          STREET_TYPE = {Street Type},",
+				"          STREET_DIRECTION = {Street Direction},",
+				"          STREET_UNIT = {Street Unit}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1"
 			]
 		}
 	}
