@@ -12,10 +12,39 @@
 					"name": "DallasSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DIM_LOCATION",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "select4"
 				}
 			],
 			"scriptLines": [
@@ -46,6 +75,7 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> DallasSource",
 				"DallasSource select(mapColumn(",
+				"          RESTRAURANT_NAME = {Restaurant Name},",
 				"          ADDRESS = {Street Address},",
 				"          ZIP = {Zip Code},",
 				"          LOCATION = LatLongLocation,",
@@ -56,7 +86,105 @@
 				"          STREET_UNIT = {Street Unit}",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(CITY = 'DALLAS',",
+				"          STATE = 'TX',",
+				"          LATITUDE = trim(split(replace(replace(LOCATION, '(', ''), ')', ''), ',')[1]),",
+				"          LONGITUDE = trim(split(replace(replace(LOCATION, '(', ''), ')', ''), ',')[2]),",
+				"          STREET_DIRECTION = iif(isNull(STREET_DIRECTION) || trim(STREET_DIRECTION) == '', 'None', STREET_DIRECTION),",
+				"          STREET_UNIT = iif(isNull(STREET_UNIT) || trim(STREET_UNIT) == '', 'None', STREET_UNIT)) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          LOCATION,",
+				"          STREET_NUMBER,",
+				"          STREET_NAME,",
+				"          STREET_TYPE,",
+				"          STREET_DIRECTION,",
+				"          STREET_UNIT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"aggregate1 derive(LATITUDE = iif(isNull(LATITUDE), 'None', LATITUDE),",
+				"          LONGITUDE = iif(isNull(LONGITUDE), 'None', LONGITUDE),",
+				"          LOCATION = iif(isNull(LOCATION), 'None', LOCATION)) ~> derivedColumn2",
+				"derivedColumn2 select(mapColumn(",
+				"          ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          LOCATION,",
+				"          STREET_NUMBER,",
+				"          STREET_NAME,",
+				"          STREET_TYPE,",
+				"          STREET_DIRECTION,",
+				"          STREET_UNIT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select2 aggregate(groupBy(ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP),",
+				"     LATITUDE = first(LATITUDE),",
+				"          LONGITUDE = first(LONGITUDE),",
+				"          LOCATION = first(LOCATION),",
+				"          STREET_NUMBER = first(STREET_NUMBER),",
+				"          STREET_NAME = first(STREET_NAME),",
+				"          STREET_TYPE = first(STREET_TYPE),",
+				"          STREET_DIRECTION = first(STREET_DIRECTION),",
+				"          STREET_UNIT = first(STREET_UNIT)) ~> aggregate1",
+				"select3 keyGenerate(output(LOCATION_ID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 select(mapColumn(",
+				"          LOCATION_ID,",
+				"          ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          LOCATION,",
+				"          STREET_NUMBER,",
+				"          STREET_NAME,",
+				"          STREET_TYPE,",
+				"          STREET_DIRECTION,",
+				"          STREET_UNIT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"select4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> sink1"
 			]
 		}
 	}
