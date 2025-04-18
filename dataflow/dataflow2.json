@@ -94,7 +94,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select2 keyGenerate(output(License_no as long),",
-				"     startAt: 9876546L,",
+				"     startAt: 10001L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"select1 aggregate(groupBy(Clean_Restaurant_Name),",
 				"     name = first(Clean_Restaurant_Name)) ~> aggregate1",
