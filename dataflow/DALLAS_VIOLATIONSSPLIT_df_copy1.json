@@ -1,5 +1,5 @@
 {
-	"name": "DALLAS_VIOLATIONSSPLIT_df",
+	"name": "DALLAS_VIOLATIONSSPLIT_df_copy1",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -130,15 +130,15 @@
 				"iif(isNull(toString(byName('Violation Points - 8'))), '', toString(byName('Violation Points - 8')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 9'))), '', toString(byName('Violation Points - 9')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 10'))), '', toString(byName('Violation Points - 10')))) ~> derivedColumn3",
-				"derivedColumn2 derive(violation_desc = split(violation_desc, ';')) ~> derivedColumn4",
+				"derivedColumn2 derive(violation_comment = split(violation_comment, ';')) ~> derivedColumn4",
 				"derivedColumn4 keyGenerate(output(violation_id as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey2",
-				"surrogateKey2 foldDown(unroll(violation_desc),",
+				"surrogateKey2 foldDown(unroll(violation_comment),",
 				"     mapColumn(",
 				"          Restaurant_Name,",
-				"          violation_desc,",
-				"          violation_comment,",
+				"          violation_desc = violation_comment,",
+				"          violation_comment = select1@violation_comment,",
 				"          violation_points,",
 				"          License_no,",
 				"          violation_id",
