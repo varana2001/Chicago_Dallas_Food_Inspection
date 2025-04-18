@@ -57,6 +57,12 @@
 					"name": "derivedColumn4"
 				},
 				{
+					"name": "derivedColumn5"
+				},
+				{
+					"name": "derivedColumn6"
+				},
+				{
 					"name": "flatten1"
 				},
 				{
@@ -64,15 +70,6 @@
 				},
 				{
 					"name": "flatten3"
-				},
-				{
-					"name": "select2"
-				},
-				{
-					"name": "derivedColumn5"
-				},
-				{
-					"name": "derivedColumn6"
 				}
 			],
 			"scriptLines": [
@@ -110,7 +107,7 @@
 				"     query: 'SELECT(MAX(BUISNESS_ID)) AS ID\\nFROM DIM_BUISNESS',",
 				"     format: 'query') ~> source2",
 				"derivedColumn3 select(mapColumn(",
-				"          Clean_Restaurant_Name,",
+				"          Restaurant_Name = Clean_Restaurant_Name,",
 				"          violation_desc,",
 				"          violation_comment,",
 				"          violation_points",
@@ -166,9 +163,11 @@
 				"iif(isNull(toString(byName('Violation Points - 9'))), '', toString(byName('Violation Points - 9')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 10'))), '', toString(byName('Violation Points - 10')))) ~> derivedColumn3",
 				"derivedColumn1 derive(violation_desc = split(violation_desc, ';')) ~> derivedColumn4",
-				"derivedColumn4 foldDown(unroll(violation_desc),",
+				"flatten2 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
+				"flatten3 derive(violation_points = split(violation_points, \";\")) ~> derivedColumn6",
+				"derivedColumn6 foldDown(unrollMultiple(violation_desc,violation_comment,violation_points),",
 				"     mapColumn(",
-				"          Clean_Restaurant_Name,",
+				"          Restaurant_Name,",
 				"          violation_desc,",
 				"          violation_comment,",
 				"          violation_points,",
@@ -176,11 +175,11 @@
 				"          ID,",
 				"          ROWID",
 				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten1",
-				"derivedColumn5 foldDown(unroll(violation_comment),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> flatten1",
+				"derivedColumn4 foldDown(unroll(violation_desc),",
 				"     mapColumn(",
-				"          Clean_Restaurant_Name,",
+				"          Restaurant_Name,",
 				"          violation_desc,",
 				"          violation_comment,",
 				"          violation_points,",
@@ -190,20 +189,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> flatten2",
-				"derivedColumn6 foldDown(unroll(violation_points),",
+				"derivedColumn5 foldDown(unroll(violation_comment),",
 				"     mapColumn(",
-				"          Clean_Restaurant_Name,",
-				"          violation_desc,",
-				"          violation_comment,",
-				"          violation_points,",
-				"          License_no,",
-				"          ID,",
-				"          ROWID",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten3",
-				"flatten3 select(mapColumn(",
-				"          Clean_Restaurant_Name,",
+				"          Restaurant_Name,",
 				"          violation_desc,",
 				"          violation_comment,",
 				"          violation_points,",
@@ -212,10 +200,8 @@
 				"          ROWID",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"flatten1 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
-				"flatten2 derive(violation_points = split(violation_points, ';')) ~> derivedColumn6",
-				"select2 sink(allowSchemaDrift: true,",
+				"     skipDuplicateMapOutputs: true) ~> flatten3",
+				"flatten1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          BUISNESS_ID as decimal(38,0),",
