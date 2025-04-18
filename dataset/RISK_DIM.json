@@ -1,0 +1,27 @@
+{
+	"name": "RISK_DIM",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Food_Insp_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "RISK_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "RISK_DESC",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DIM_RISK"
+		}
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"name": "DIM_RISK_CHICAGO",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "LOC_CHICAGO_STG_SF",
+						"type": "DatasetReference"
+					},
+					"name": "CHICAGOSOURCE"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "RISK_DIM",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS as string,",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> CHICAGOSOURCE",
+				"CHICAGOSOURCE select(mapColumn(",
+				"          RISK_DESC = RISK",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 keyGenerate(output(RISK_ID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> sink1"
+			]
+		}
+	}
+}
