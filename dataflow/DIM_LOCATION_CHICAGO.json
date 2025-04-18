@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "LOC_DALLAS_DIM_ST",
+						"referenceName": "LOC_CHICAGO_STG_SF",
 						"type": "DatasetReference"
 					},
 					"name": "ChicagoSource"
