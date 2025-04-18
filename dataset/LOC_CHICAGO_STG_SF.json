@@ -1,5 +1,5 @@
 {
-	"name": "LOC_DALLAS_DIM_ST",
+	"name": "LOC_CHICAGO_STG_SF",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "Food_Insp_LS",
