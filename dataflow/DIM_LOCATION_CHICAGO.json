@@ -25,6 +25,12 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -68,12 +74,36 @@
 				"select1 derive(LATITUDE = iif(isNull(LATITUDE), 'None', LATITUDE),",
 				"          LONGITUDE = iif(isNull(LONGITUDE), 'None', LONGITUDE),",
 				"          LOCATION = iif(isNull(LOCATION), 'None', LOCATION),",
-				"          STREET_NUMBER = toString(split(ADDRESS, ' ')[1]),",
-				"          STREET_NAME = toString(split(ADDRESS, ' ')[3]),",
-				"          STREET_TYPE = toString(split(ADDRESS, ' ')[4]),",
-				"          STREET_DIRECTION = toString(split(ADDRESS, ' ')[2]),",
-				"          STREET_UNIT = toString(split(ADDRESS, ' ')[5])) ~> derivedColumn1",
+				"          splitAddress = split(ADDRESS, ' ')) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
+				"          ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          LOCATION,",
+				"          splitAddress",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 derive(STREET_NUMBER = splitAddress[1],",
+				"          STREET_NAME = toString(",
+				"    join(",
+				"        slice(",
+				"            splitAddress,",
+				"            3,",
+				"            length(splitAddress) - iif(contains(splitAddress[length(splitAddress)], '('), 3, 2)",
+				"        ),",
+				"        ' '",
+				"    )",
+				")",
+				",",
+				"          STREET_TYPE = ERROR_FUNCTION(''),",
+				"          STREET_DIRECTION = splitAddress[2],",
+				"          STREET_UNIT = ERROR_FUNCTION(''),",
+				"          ADDRESS_LENGTH = toInteger(length(splitAddress))) ~> derivedColumn2",
+				"derivedColumn2 select(mapColumn(",
 				"          ADDRESS,",
 				"          CITY,",
 				"          STATE,",
@@ -88,9 +118,10 @@
 				"          STREET_UNIT",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 derive(STREET_TYPE = iif(isNull(STREET_TYPE), 'None', STREET_TYPE),",
-				"          STREET_UNIT = iif(isNull(STREET_UNIT), 'None', STREET_UNIT)) ~> derivedColumn2"
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 keyGenerate(output({undefined} as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1"
 			]
 		}
 	}
