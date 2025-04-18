@@ -1,0 +1,180 @@
+{
+	"name": "dataflow2_copy1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "newdallas",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable2",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dim_Business",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "surrogateKey2"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "pivot1"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          RecordID as string,",
+				"          {Restaurant Name} as string,",
+				"          {Inspection Type} as string,",
+				"          {Inspection Date} as string,",
+				"          {Inspection Score} as string,",
+				"          {Street Number} as string,",
+				"          {Street Name} as string,",
+				"          {Street Direction} as string,",
+				"          {Street Type} as string,",
+				"          {Street Unit} as string,",
+				"          {Street Address} as string,",
+				"          {Zip Code} as string,",
+				"          {Inspection Month} as string,",
+				"          {Inspection Year} as string,",
+				"          {Lat Long Location} as string,",
+				"          Clean_Restaurant_Name as string,",
+				"          IsCoordinateRow as string,",
+				"          LatLongLocation as string,",
+				"          Name as string,",
+				"          Value as string,",
+				"          CLEAN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          ID as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     query: 'SELECT(MAX(BUISNESS_ID)) AS ID\\nFROM DIM_BUISNESS',",
+				"     format: 'query') ~> source2",
+				"derivedColumn3 select(mapColumn(",
+				"          Clean_Restaurant_Name,",
+				"          violation_desc,",
+				"          violation_comment,",
+				"          violation_points",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 keyGenerate(output(License_no as long),",
+				"     startAt: 10001L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"derivedColumn2, source2 join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 keyGenerate(output(ROWID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey2",
+				"surrogateKey2 derive(ID = ID+ROWID) ~> derivedColumn1",
+				"surrogateKey1 derive(License_no = toInteger(License_no)) ~> derivedColumn2",
+				"source1 pivot(groupBy(Clean_Restaurant_Name),",
+				"     pivotBy(Name),",
+				"     {} = first(Value),",
+				"     columnNaming: '$N$V',",
+				"     lateral: true) ~> pivot1",
+				"pivot1 derive(violation_desc = iif(isNull(toString(byName('Violation Description - 1'))), '', toString(byName('Violation Description - 1')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 2'))), '', toString(byName('Violation Description - 2')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 3'))), '', toString(byName('Violation Description - 3')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 4'))), '', toString(byName('Violation Description - 4')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 5'))), '', toString(byName('Violation Description - 5')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 6'))), '', toString(byName('Violation Description - 6')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 7'))), '', toString(byName('Violation Description - 7')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 8'))), '', toString(byName('Violation Description - 8')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 9'))), '', toString(byName('Violation Description - 9')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Description - 10'))), '', toString(byName('Violation Description - 10')))\r",
+				",",
+				"          violation_comment = iif(isNull(toString(byName('Violation Memo - 1'))), '', toString(byName('Violation Memo - 1')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 2'))), '', toString(byName('Violation Memo - 2')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 3'))), '', toString(byName('Violation Memo - 3')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 4'))), '', toString(byName('Violation Memo - 4')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 5'))), '', toString(byName('Violation Memo - 5')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 6'))), '', toString(byName('Violation Memo - 6')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 7'))), '', toString(byName('Violation Memo - 7')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 8'))), '', toString(byName('Violation Memo - 8')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 9'))), '', toString(byName('Violation Memo - 9')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Memo - 10'))), '', toString(byName('Violation Memo - 10')))\r",
+				",",
+				"          violation_points = iif(isNull(toString(byName('Violation Points - 1'))), '', toString(byName('Violation Points - 1')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 2'))), '', toString(byName('Violation Points - 2')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 3'))), '', toString(byName('Violation Points - 3')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 4'))), '', toString(byName('Violation Points - 4')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 5'))), '', toString(byName('Violation Points - 5')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 6'))), '', toString(byName('Violation Points - 6')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 7'))), '', toString(byName('Violation Points - 7')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 8'))), '', toString(byName('Violation Points - 8')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 9'))), '', toString(byName('Violation Points - 9')) + ';') +\r",
+				"iif(isNull(toString(byName('Violation Points - 10'))), '', toString(byName('Violation Points - 10')))\r",
+				") ~> derivedColumn3",
+				"derivedColumn1 derive(violation_desc = split(violation_desc, ';')\r",
+				") ~> derivedColumn4",
+				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          BUISNESS_ID = ID,",
+				"          DBA_NAME = name,",
+				"          LICENSE_NUMBER = License_no",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
