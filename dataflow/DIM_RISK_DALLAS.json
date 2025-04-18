@@ -12,16 +12,40 @@
 					"name": "dallasSource"
 				},
 				{
+					"dataset": {
+						"referenceName": "RISK_DIM",
+						"type": "DatasetReference"
+					},
 					"name": "chicagoSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "RISK_DIM",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -51,14 +75,48 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> dallasSource",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> chicagoSource",
+				"source(output(",
+				"          RISK_KEY as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     query: 'SELECT (MAX(RISK_ID)) AS RISK_KEY from DIM_RISK',",
+				"     format: 'query') ~> chicagoSource",
 				"dallasSource derive(RISK_DESC = toString('None')) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
 				"          RISK_DESC",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1, chicagoSource join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 keyGenerate(output(RISK_SK as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(RISK_ID = RISK_KEY + RISK_SK) ~> derivedColumn2",
+				"derivedColumn2 select(mapColumn(",
+				"          RISK_DESC,",
+				"          RISK_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> sink1"
 			]
 		}
 	}
