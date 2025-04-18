@@ -26,6 +26,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
+				},
+				{
+					"name": "sink2"
 				}
 			],
 			"transformations": [
@@ -61,6 +64,9 @@
 				},
 				{
 					"name": "derivedColumn6"
+				},
+				{
+					"name": "flatten1"
 				},
 				{
 					"name": "derivedColumn7"
@@ -157,9 +163,21 @@
 				"iif(isNull(toString(byName('Violation Points - 9'))), '', toString(byName('Violation Points - 9')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 10'))), '', toString(byName('Violation Points - 10')))) ~> derivedColumn3",
 				"derivedColumn1 derive(violation_desc = split(violation_desc, ';')) ~> derivedColumn4",
-				"derivedColumn4 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
+				"flatten1 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
 				"derivedColumn5 derive(violation_points = split(violation_points, \";\")) ~> derivedColumn6",
-				"derivedColumn6 derive(violation_structs = ERROR_FUNCTION('map(__NEW_LINE_R____NEW_LINE_N__    range(0, size(violation_desc)),__NEW_LINE_R____NEW_LINE_N__    i -> violation_structs(__NEW_LINE_R____NEW_LINE_N__        desc = (violation_desc[i]), null(), violation_desc[i]),__NEW_LINE_R____NEW_LINE_N__        memo = (violation_comment[i])), null(), violation_comment[i]),__NEW_LINE_R____NEW_LINE_N__        points =(violation_points[i])), null(), toInteger(violation_points[i]))__NEW_LINE_R____NEW_LINE_N__    )__NEW_LINE_R____NEW_LINE_N__)')) ~> derivedColumn7",
+				"derivedColumn4 foldDown(unroll(violation_desc),",
+				"     mapColumn(",
+				"          Restaurant_Name,",
+				"          violation_desc,",
+				"          violation_comment,",
+				"          violation_points,",
+				"          License_no,",
+				"          ID,",
+				"          ROWID",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"derivedColumn6 derive(struct = ERROR_FUNCTION('')) ~> derivedColumn7",
 				"derivedColumn7 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -181,7 +199,11 @@
 				"          BUISNESS_ID = ID,",
 				"          DBA_NAME = name,",
 				"          LICENSE_NUMBER = License_no",
-				"     )) ~> sink1"
+				"     )) ~> sink1",
+				"flatten1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
 			]
 		}
 	}
