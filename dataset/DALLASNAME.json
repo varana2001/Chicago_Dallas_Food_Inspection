@@ -1,0 +1,33 @@
+{
+	"name": "DALLASNAME",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "BUISNESS_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "DBA_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUMBER",
+				"type": "NUMBER",
+				"precision": 15,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DALLAS_NAME"
+		}
+	}
+}
