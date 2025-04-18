@@ -10,24 +10,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
-				},
-				{
-					"dataset": {
-						"referenceName": "SnowflakeTable2",
-						"type": "DatasetReference"
-					},
-					"name": "source2"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "dim_Business",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "select1"
@@ -36,13 +21,7 @@
 					"name": "surrogateKey1"
 				},
 				{
-					"name": "join1"
-				},
-				{
 					"name": "surrogateKey2"
-				},
-				{
-					"name": "derivedColumn1"
 				},
 				{
 					"name": "derivedColumn2"
@@ -63,7 +42,10 @@
 					"name": "derivedColumn6"
 				},
 				{
-					"name": "derivedColumn7"
+					"name": "map"
+				},
+				{
+					"name": "flatten1"
 				}
 			],
 			"scriptLines": [
@@ -93,13 +75,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"source(output(",
-				"          ID as decimal(38,0)",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     query: 'SELECT(MAX(BUISNESS_ID)) AS ID\\nFROM DIM_BUISNESS',",
-				"     format: 'query') ~> source2",
 				"derivedColumn3 select(mapColumn(",
 				"          Restaurant_Name = Clean_Restaurant_Name,",
 				"          violation_desc,",
@@ -111,15 +86,9 @@
 				"select1 keyGenerate(output(License_no as long),",
 				"     startAt: 10001L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"derivedColumn2, source2 join(1==1,",
-				"     joinType:'cross',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1",
-				"join1 keyGenerate(output(ROWID as long),",
+				"derivedColumn2 keyGenerate(output(ROWID as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey2",
-				"surrogateKey2 derive(ID = ID+ROWID) ~> derivedColumn1",
 				"surrogateKey1 derive(License_no = toInteger(License_no)) ~> derivedColumn2",
 				"source1 pivot(groupBy(Clean_Restaurant_Name),",
 				"     pivotBy(Name),",
@@ -156,39 +125,22 @@
 				"iif(isNull(toString(byName('Violation Points - 8'))), '', toString(byName('Violation Points - 8')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 9'))), '', toString(byName('Violation Points - 9')) + ';') +\r",
 				"iif(isNull(toString(byName('Violation Points - 10'))), '', toString(byName('Violation Points - 10')))) ~> derivedColumn3",
-				"derivedColumn1 derive(violation_desc = split(violation_desc, ';')) ~> derivedColumn4",
-				"derivedColumn4 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
+				"surrogateKey2 derive(violation_desc = split(violation_desc, ';')) ~> derivedColumn4",
+				"flatten1 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn5",
 				"derivedColumn5 derive(violation_points = split(violation_points, \";\")) ~> derivedColumn6",
-				"derivedColumn6 derive(violation_structs = map(\r",
-				"    range(0, size(violation_desc)),\r",
-				"    i -> violation_structs(\r",
-				"        desc = (violation_desc[i]), null(), violation_desc[i]),\r",
-				"        memo = (violation_comment[i])), null(), violation_comment[i]),\r",
-				"        points =(violation_points[i])), null(), toInteger(violation_points[i]))\r",
-				"    )\r",
-				")) ~> derivedColumn7",
-				"derivedColumn7 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          BUISNESS_ID as decimal(38,0),",
-				"          DBA_NAME as string,",
-				"          AKA_NAME as string,",
-				"          LICENSE_NUMBER as decimal(38,0),",
-				"          FACILITY_TYPE as string",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     stageInsert: true,",
+				"derivedColumn6 derive(violation_structs = ERROR_FUNCTION('')) ~> map",
+				"derivedColumn4 foldDown(unroll(violation_desc),",
 				"     mapColumn(",
-				"          BUISNESS_ID = ID,",
-				"          DBA_NAME = name,",
-				"          LICENSE_NUMBER = License_no",
-				"     )) ~> sink1"
+				"          Restaurant_Name,",
+				"          violation_desc,",
+				"          violation_comment,",
+				"          violation_points,",
+				"          License_no,",
+				"          ID,",
+				"          ROWID",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1"
 			]
 		}
 	}
