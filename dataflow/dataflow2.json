@@ -1,0 +1,64 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "newdallas",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "dim_Business",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          RecordID as string,",
+				"          {Restaurant Name} as string,",
+				"          {Inspection Type} as string,",
+				"          {Inspection Date} as string,",
+				"          {Inspection Score} as string,",
+				"          {Street Number} as string,",
+				"          {Street Name} as string,",
+				"          {Street Direction} as string,",
+				"          {Street Type} as string,",
+				"          {Street Unit} as string,",
+				"          {Street Address} as string,",
+				"          {Zip Code} as string,",
+				"          {Inspection Month} as string,",
+				"          {Inspection Year} as string,",
+				"          {Lat Long Location} as string,",
+				"          Clean_Restaurant_Name as string,",
+				"          IsCoordinateRow as string,",
+				"          LatLongLocation as string,",
+				"          Name as string,",
+				"          Value as string,",
+				"          CLEAN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source2"
+			]
+		}
+	}
+}
