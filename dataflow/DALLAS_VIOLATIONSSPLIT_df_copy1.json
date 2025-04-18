@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable3",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -47,13 +54,10 @@
 					"name": "flatten1"
 				},
 				{
-					"name": "derivedColumn7"
-				},
-				{
-					"name": "derivedColumn8"
-				},
-				{
 					"name": "derivedColumn9"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -83,6 +87,22 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          START_DATE as date,",
+				"          END_DATE as date,",
+				"          IS_CURRENT as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          DBA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(15,0),",
+				"          VIOLATION_POINTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source2",
 				"derivedColumn3 select(mapColumn(",
 				"          Restaurant_Name = Clean_Restaurant_Name,",
 				"          violation_desc,",
@@ -137,23 +157,16 @@
 				"surrogateKey2 foldDown(unroll(violation_comment),",
 				"     mapColumn(",
 				"          Restaurant_Name,",
-				"          violation_desc = violation_comment,",
-				"          violation_comment = select1@violation_comment,",
-				"          violation_points,",
+				"          violation_comment,",
 				"          License_no,",
 				"          violation_id",
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> flatten1",
-				"flatten1 derive(violation_code = toInteger(\r",
-				"    trim(\r",
-				"        regexExtract(violation_desc, '^\\\\*?(\\\\d+)', 1)\r",
-				"    )\r",
-				")) ~> derivedColumn7",
-				"derivedColumn7 derive(violation_description = trim(\r",
-				"    regexReplace(violation_desc, '^\\\\*?\\\\d+\\\\s*', '')\r",
-				")) ~> derivedColumn8",
-				"derivedColumn8 derive(source_city = \"Dallas\") ~> derivedColumn9",
+				"aggregate1 derive(source_city = \"Dallas\") ~> derivedColumn9",
+				"flatten1 aggregate(groupBy(violation_comment,",
+				"          License_no),",
+				"     id = first(select2@VIOLATION_ID)) ~> aggregate1",
 				"derivedColumn9 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -178,12 +191,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          VIOLATION_ID = violation_id,",
-				"          VIOLATION_CODE = violation_code,",
-				"          VIOLATION_DESC = violation_description,",
-				"          SOURCE_CITY = source_city,",
-				"          DBA_NAME = Restaurant_Name,",
-				"          LICENSE_NUMBER = License_no",
+				"          COMMENTS = violation_comment",
 				"     )) ~> sink1"
 			]
 		}
