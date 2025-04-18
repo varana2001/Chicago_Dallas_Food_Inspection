@@ -42,9 +42,6 @@
 				},
 				{
 					"name": "surrogateKey1"
-				},
-				{
-					"name": "select4"
 				}
 			],
 			"scriptLines": [
@@ -144,24 +141,7 @@
 				"select3 keyGenerate(output(LOCATION_ID as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 select(mapColumn(",
-				"          LOCATION_ID,",
-				"          ADDRESS,",
-				"          CITY,",
-				"          STATE,",
-				"          ZIP,",
-				"          LATITUDE,",
-				"          LONGITUDE,",
-				"          LOCATION,",
-				"          STREET_NUMBER,",
-				"          STREET_NAME,",
-				"          STREET_TYPE,",
-				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select4",
-				"select4 sink(allowSchemaDrift: true,",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          LOCATION_ID as decimal(38,0),",
