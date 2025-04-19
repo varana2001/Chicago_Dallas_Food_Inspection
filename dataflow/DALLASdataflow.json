@@ -12,13 +12,17 @@
 					"name": "source1"
 				},
 				{
+					"dataset": {
+						"referenceName": "business",
+						"type": "DatasetReference"
+					},
 					"name": "source2"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DIM_Business",
+						"referenceName": "business",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -39,6 +43,15 @@
 				},
 				{
 					"name": "select3"
+				},
+				{
+					"name": "surrogateKey2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -69,52 +82,48 @@
 				"          ID as decimal(38,0)",
 				"     ),",
 				"     allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source2",
+				"     validateSchema: false,",
+				"     query: 'select max(BUISNESS_ID) AS ID\\nFROM DIM_BUISNESS',",
+				"     format: 'query') ~> source2",
 				"join1 keyGenerate(output(row_id as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 derive(ID = ID+row_id) ~> derivedColumn1",
-				"select3, source2 join(1==1,",
+				"surrogateKey1 derive(ID = ID + row_id) ~> derivedColumn1",
+				"surrogateKey2, source2 join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
 				"derivedColumn1 select(mapColumn(",
-				"          name,",
+				"          RESTAURANTNAME,",
+				"          License_no,",
 				"          ID",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"source1 select(mapColumn(",
-				"          ROWID,",
-				"          INSPECTION_ID,",
-				"          RESTAURANTNAME,",
-				"          INSPECTIONTYPE,",
-				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE,",
-				"          STREETNUMBER,",
-				"          STREETNAME,",
-				"          STREETDIRECTION,",
-				"          STREETTYPE,",
-				"          STREETUNIT,",
-				"          STREETADDRESS,",
-				"          ZIPCODE,",
-				"          INSPECTIONMONTH,",
-				"          INSPECTIONYEAR,",
-				"          LATLONGLOCATION,",
-				"          VIOLATIONS,",
-				"          COMMENTS",
+				"aggregate1 select(mapColumn(",
+				"          RESTAURANTNAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
-				"select2 sink(allowSchemaDrift: true,",
+				"select3 keyGenerate(output(License_no as long),",
+				"     startAt: 10001L,",
+				"     stepValue: 1L) ~> surrogateKey2",
+				"select2 derive(Source_city = \"Dallas\",",
+				"          RESTAURANTNAME = iif(isNull(RESTAURANTNAME), \"None\", RESTAURANTNAME),",
+				"          facility_type = \"None\",",
+				"          aka_name = \"None\") ~> derivedColumn2",
+				"source1 aggregate(groupBy(RESTAURANTNAME),",
+				"     name = first(RESTAURANTNAME)) ~> aggregate1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          BUISNESS_ID as decimal(38,0),",
 				"          DBA_NAME as string,",
 				"          AKA_NAME as string,",
 				"          LICENSE_NUMBER as decimal(38,0),",
-				"          FACILITY_TYPE as string",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -126,7 +135,11 @@
 				"     stageInsert: true,",
 				"     mapColumn(",
 				"          BUISNESS_ID = ID,",
-				"          DBA_NAME = name",
+				"          DBA_NAME = RESTAURANTNAME,",
+				"          AKA_NAME = aka_name,",
+				"          LICENSE_NUMBER = License_no,",
+				"          FACILITY_TYPE = facility_type,",
+				"          SOURCE_CITY = Source_city",
 				"     )) ~> sink1"
 			]
 		}
