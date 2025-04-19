@@ -212,7 +212,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, BUSIDIM join(select1@DBA_NAME == BUSIDIM@DBA_NAME,",
+				"join3, BUSIDIM join(ChicagoStg@DBA_NAME == BUSIDIM@DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
