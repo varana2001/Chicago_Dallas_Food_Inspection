@@ -1,0 +1,75 @@
+{
+	"name": "DALLAS_FACTLOAD",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable6",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable7",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "join1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          RESTAURANTNAME as string,",
+				"          INSPECTIONTYPE as string,",
+				"          INSPECTIONDATE as string,",
+				"          INSPECTIONSCORE as string,",
+				"          STREETNUMBER as string,",
+				"          STREETNAME as string,",
+				"          STREETDIRECTION as string,",
+				"          STREETTYPE as string,",
+				"          STREETUNIT as string,",
+				"          STREETADDRESS as string,",
+				"          ZIPCODE as string,",
+				"          INSPECTIONMONTH as string,",
+				"          INSPECTIONYEAR as string,",
+				"          LATLONGLOCATION as string,",
+				"          VIOLATIONS as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source1",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     query: 'SELECT MAX(FACT_SK) AS ID\\nFROM FCT_INSP',",
+				"     format: 'query') ~> source2",
+				"source1 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1, source2 join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1"
+			]
+		}
+	}
+}

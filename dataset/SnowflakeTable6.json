@@ -1,0 +1,91 @@
+{
+	"name": "SnowflakeTable6",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "ROWID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_ID",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "RESTAURANTNAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTIONTYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTIONDATE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTIONSCORE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETNUMBER",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETNAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETDIRECTION",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETTYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETUNIT",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREETADDRESS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ZIPCODE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTIONMONTH",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTIONYEAR",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LATLONGLOCATION",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "VIOLATIONS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "COMMENTS",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "STG_DALLAS"
+		}
+	}
+}
