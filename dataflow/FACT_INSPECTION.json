@@ -13,7 +13,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "DIM_LOCATION",
+						"referenceName": "SnowflakeTableDIM_LOC",
 						"type": "DatasetReference"
 					},
 					"name": "LOCDIM"
