@@ -84,6 +84,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -197,12 +200,12 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> BUSIDIM",
-				"ChicagoStg, LOCDIM join(ChicagoStg@ADDRESS == LOCDIM@ADDRESS,",
+				"select2, LOCDIM join(select2@ADDRESS == LOCDIM@ADDRESS,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, VIOLDIM join(ChicagoStg@VIOLATION_DESC == VIOLDIM@VIOLATION_DESC,",
+				"join1, VIOLDIM join(select2@VIOLATION_DESC == VIOLDIM@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -212,7 +215,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, BUSIDIM join(ChicagoStg@DBA_NAME == BUSIDIM@DBA_NAME,",
+				"join3, BUSIDIM join(select2@DBA_NAME == BUSIDIM@DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -231,6 +234,19 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"ChicagoStg select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          DBA_NAME,",
+				"          RISK,",
+				"          ADDRESS,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          VIOLATIONS,",
+				"          VIOLATION_DESC",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
