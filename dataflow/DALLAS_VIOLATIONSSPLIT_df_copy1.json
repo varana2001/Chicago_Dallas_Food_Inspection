@@ -58,6 +58,15 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select3"
 				}
 			],
 			"scriptLines": [
@@ -164,10 +173,29 @@
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> flatten1",
 				"aggregate1 derive(source_city = \"Dallas\") ~> derivedColumn9",
-				"flatten1 aggregate(groupBy(violation_comment,",
+				"join1 aggregate(groupBy(violation_comment,",
 				"          License_no),",
 				"     id = first(select2@VIOLATION_ID)) ~> aggregate1",
-				"derivedColumn9 sink(allowSchemaDrift: true,",
+				"source2 select(mapColumn(",
+				"          VIOLATION_ID,",
+				"          COMMENTS,",
+				"          DBA_NAME,",
+				"          LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"flatten1, select2 join(License_no == LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"derivedColumn9 select(mapColumn(",
+				"          violation_comment,",
+				"          License_no",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          VIOLATION_ID as decimal(38,0),",
@@ -191,7 +219,8 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          COMMENTS = violation_comment",
+				"          COMMENTS = violation_comment,",
+				"          LICENSE_NUMBER = License_no",
 				"     )) ~> sink1"
 			]
 		}
