@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "chicagodataflow3",
+						"referenceName": "FACT_INSPECTION_FINAL",
 						"type": "DataFlowReference"
 					},
 					"compute": {

@@ -1,5 +1,5 @@
 {
-	"name": "chicagodataflow3",
+	"name": "FACT_INSPECTION_FINAL",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
