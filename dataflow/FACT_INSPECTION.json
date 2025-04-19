@@ -87,6 +87,9 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -247,7 +250,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"surrogateKey1 sink(allowSchemaDrift: true,",
+				"surrogateKey1 derive(RESULTS = iif((RESULTS==\"Pass\"),1,0),",
+				"          INSPECTION_DATE = toDate(INSPECTION_DATE, 'MM/dd/yyyy')) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
