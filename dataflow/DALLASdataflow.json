@@ -3,11 +3,117 @@
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
-			"transformations": [],
+			"sources": [
+				{
+					"name": "source1"
+				},
+				{
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DIM_Business",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select2"
+				}
+			],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          RecordID as string,",
+				"          {Restaurant Name} as string,",
+				"          {Inspection Type} as string,",
+				"          {Inspection Date} as string,",
+				"          {Inspection Score} as string,",
+				"          {Street Number} as string,",
+				"          {Street Name} as string,",
+				"          {Street Direction} as string,",
+				"          {Street Type} as string,",
+				"          {Street Unit} as string,",
+				"          {Street Address} as string,",
+				"          {Zip Code} as string,",
+				"          {Inspection Month} as string,",
+				"          {Inspection Year} as string,",
+				"          {Lat Long Location} as string,",
+				"          Clean_Restaurant_Name as string,",
+				"          IsCoordinateRow as string,",
+				"          LatLongLocation as string,",
+				"          Name as string,",
+				"          Value as string,",
+				"          CLEAN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source1",
+				"source(output(",
+				"          ID as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source2",
+				"source1 select(mapColumn(",
+				"          Restaurant_Name = Clean_Restaurant_Name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 aggregate(groupBy(Restaurant_Name),",
+				"     name = first(Restaurant_Name)) ~> aggregate1",
+				"join1 keyGenerate(output(row_id as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(ID = ID+row_id) ~> derivedColumn1",
+				"aggregate1, source2 join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"derivedColumn1 select(mapColumn(",
+				"          name,",
+				"          ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          BUISNESS_ID = ID,",
+				"          DBA_NAME = name",
+				"     )) ~> sink1"
 			]
 		}
 	}
