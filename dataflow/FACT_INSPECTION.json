@@ -202,7 +202,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, VIOLDIM join(select1@VIOLATION_DESC == VIOLDIM@VIOLATION_DESC,",
+				"join1, VIOLDIM join(ChicagoStg@VIOLATION_DESC == VIOLDIM@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
