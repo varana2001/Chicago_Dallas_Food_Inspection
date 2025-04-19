@@ -76,7 +76,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive() ~> derivedColumn1"
+				"select1 derive(VIOLATION_DESC = ERROR_FUNCTION('')) ~> derivedColumn1"
 			]
 		}
 	}
