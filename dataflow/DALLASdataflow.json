@@ -25,9 +25,6 @@
 					"name": "select1"
 				},
 				{
-					"name": "aggregate1"
-				},
-				{
 					"name": "surrogateKey1"
 				},
 				{
@@ -76,13 +73,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 aggregate(groupBy(Restaurant_Name),",
-				"     name = first(Restaurant_Name)) ~> aggregate1",
 				"join1 keyGenerate(output(row_id as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(ID = ID+row_id) ~> derivedColumn1",
-				"aggregate1, source2 join(1==1,",
+				"select1, source2 join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
