@@ -74,13 +74,19 @@
 					"name": "derivedColumn1"
 				},
 				{
-					"name": "select2"
+					"name": "join1"
 				},
 				{
-					"name": "aggregate1"
+					"name": "join2"
 				},
 				{
-					"name": "select3"
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
 				}
 			],
 			"scriptLines": [
@@ -194,7 +200,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> STGDALLAS",
-				"source1 select(mapColumn(",
+				"join5 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          INSPECTION_DATE,",
 				"          INSPECTION_TYPE,",
@@ -207,19 +213,31 @@
 				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(RESULTS = iif((RESULTS == \"Pass\"), 1, 0),",
 				"          INSPECTION_DATE = toDate(INSPECTION_DATE, 'MM/dd/yyyy')) ~> derivedColumn1",
-				"STGDALLAS select(mapColumn(",
-				"          INSPECTIONSCORE,",
-				"          RESTAURANTNAME",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 aggregate(groupBy(INSPECTIONSCORE),",
-				"     RESTAURANTNAME = first(RESTAURANTNAME)) ~> aggregate1",
-				"aggregate1 select(mapColumn(",
-				"          INSPECTIONSCORE",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select3",
+				"source1, LocationDim join(source1@ADDRESS == LocationDim@ADDRESS,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, ViolationDIM join(source1@VIOLATION_DESC == ViolationDIM@VIOLATION_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2, DATEDIM join(INSPECTION_DATE == toString(DT),",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, BUISNESSDIM join(source1@DBA_NAME == BUISNESSDIM@DBA_NAME,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4, RISKDIM join(RISK == RISK_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
