@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable3",
+						"referenceName": "Violation",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -44,9 +44,6 @@
 					"name": "surrogateKey2"
 				},
 				{
-					"name": "flatten1"
-				},
-				{
 					"name": "derivedColumn7"
 				},
 				{
@@ -54,12 +51,6 @@
 				},
 				{
 					"name": "derivedColumn9"
-				},
-				{
-					"name": "derivedColumn10"
-				},
-				{
-					"name": "flatten2"
 				},
 				{
 					"name": "derivedColumn11"
@@ -81,6 +72,9 @@
 				},
 				{
 					"name": "derivedColumn16"
+				},
+				{
+					"name": "derivedColumn17"
 				}
 			],
 			"scriptLines": [
@@ -161,43 +155,17 @@
 				"derivedColumn16 keyGenerate(output(violation_id as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey2",
-				"surrogateKey2 foldDown(unroll(violation_desc),",
-				"     mapColumn(",
-				"          Restaurant_Name,",
-				"          violation_desc,",
-				"          violation_comment,",
-				"          violation_points,",
-				"          License_no,",
-				"          violation_id",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten1",
-				"flatten1 derive(violation_code = toInteger(\r",
+				"surrogateKey2 derive(code = toInteger(\r",
 				"    trim(\r",
-				"        regexExtract(violation_desc, '^\\\\*?(\\\\d+)', 1)\r",
+				"        regexExtract(flat_desc, '^\\\\*?(\\\\d+)', 1)\r",
 				"    )\r",
 				")) ~> derivedColumn7",
-				"derivedColumn7 derive(violation_description = trim(\r",
-				"    regexReplace(violation_desc, '^\\\\*?\\\\d+\\\\s*', '')\r",
+				"derivedColumn7 derive(flat_desc = trim(\r",
+				"    regexReplace(flat_desc, '^\\\\*?\\\\d+\\\\s*', '')\r",
 				")) ~> derivedColumn8",
-				"flatten2 derive(source_city = \"Dallas\") ~> derivedColumn9",
-				"derivedColumn8 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn10",
-				"derivedColumn10 foldDown(unroll(violation_comment),",
-				"     mapColumn(",
-				"          Restaurant_Name,",
-				"          violation_desc,",
-				"          violation_comment,",
-				"          violation_points,",
-				"          License_no,",
-				"          violation_id,",
-				"          violation_code,",
-				"          violation_description",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten2",
+				"derivedColumn8 derive(source_city = \"Dallas\") ~> derivedColumn9",
 				"derivedColumn15 derive(arrayIndex = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) ~> derivedColumn11",
-				"flatten3 derive(flat_desc = iif(size(violation_desc) >= arrayIndex, violation_desc[arrayIndex-1], \"None\")\r",
-				") ~> derivedColumn12",
+				"flatten3 derive(flat_desc = iif(size(violation_desc) >= arrayIndex, violation_desc[arrayIndex-1], \"None\")) ~> derivedColumn12",
 				"derivedColumn11 foldDown(unroll(arrayIndex),",
 				"     mapColumn(",
 				"          Restaurant_Name,",
@@ -213,20 +181,20 @@
 				"derivedColumn4 derive(violation_comment = split(violation_comment, \";\")) ~> derivedColumn14",
 				"derivedColumn14 derive(violation_points = split(violation_points, \";\")) ~> derivedColumn15",
 				"derivedColumn13 derive(violation_points = iif(size(violation_points) >= arrayIndex, violation_points[arrayIndex-1], \"\")) ~> derivedColumn16",
-				"derivedColumn9 sink(allowSchemaDrift: true,",
+				"derivedColumn9 derive(flat_desc = iif(isNull(flat_desc), \"None\", flat_desc),",
+				"          code = iif(isNull(code), -1, code),",
+				"          flat_comment = iif(isNull(flat_comment), \"None\", flat_comment),",
+				"          violation_points = iif(isNull(violation_points), \"-1\", violation_points)) ~> derivedColumn17",
+				"derivedColumn17 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          VIOLATION_ID as decimal(38,0),",
-				"          START_DATE as date,",
-				"          END_DATE as date,",
-				"          IS_CURRENT as decimal(38,0),",
 				"          VIOLATION_CODE as decimal(38,0),",
 				"          VIOLATION_DESC as string,",
 				"          COMMENTS as string,",
 				"          SOURCE_CITY as string,",
-				"          DBA_NAME as string,",
-				"          LICENSE_NUMBER as decimal(15,0),",
-				"          VIOLATION_POINTS as string",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -238,10 +206,11 @@
 				"     stageInsert: true,",
 				"     mapColumn(",
 				"          VIOLATION_ID = violation_id,",
-				"          VIOLATION_CODE = violation_code,",
-				"          VIOLATION_DESC = violation_description,",
+				"          VIOLATION_CODE = code,",
+				"          VIOLATION_DESC = flat_desc,",
+				"          COMMENTS = flat_comment,",
 				"          SOURCE_CITY = source_city,",
-				"          DBA_NAME = Restaurant_Name,",
+				"          VIOLATION_POINTS = violation_points,",
 				"          LICENSE_NUMBER = License_no",
 				"     )) ~> sink1"
 			]
