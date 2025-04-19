@@ -1,18 +1,259 @@
 {
-	"name": "dataflow1",
+	"name": "FACT_INSPECTION",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
-					"name": "source1"
+					"dataset": {
+						"referenceName": "CHICAGOSTAGESF",
+						"type": "DatasetReference"
+					},
+					"name": "ChicagoStg"
+				},
+				{
+					"dataset": {
+						"referenceName": "DIM_LOCATION",
+						"type": "DatasetReference"
+					},
+					"name": "LOCDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "RISK_DIM",
+						"type": "DatasetReference"
+					},
+					"name": "RISKDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "DallasSTGSF",
+						"type": "DatasetReference"
+					},
+					"name": "DALLASSTG"
+				},
+				{
+					"dataset": {
+						"referenceName": "VIOLSF",
+						"type": "DatasetReference"
+					},
+					"name": "VIOLDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "DATESF",
+						"type": "DatasetReference"
+					},
+					"name": "DATEDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "BUSIDIM",
+						"type": "DatasetReference"
+					},
+					"name": "BUSIDIM"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "FACTSF",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "select1"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source1"
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS as string,",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> ChicagoStg",
+				"source(output(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> LOCDIM",
+				"source(output(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> RISKDIM",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          RESTAURANTNAME as string,",
+				"          INSPECTIONTYPE as string,",
+				"          INSPECTIONDATE as string,",
+				"          INSPECTIONSCORE as string,",
+				"          STREETNUMBER as string,",
+				"          STREETNAME as string,",
+				"          STREETDIRECTION as string,",
+				"          STREETTYPE as string,",
+				"          STREETUNIT as string,",
+				"          STREETADDRESS as string,",
+				"          ZIPCODE as string,",
+				"          INSPECTIONMONTH as string,",
+				"          INSPECTIONYEAR as string,",
+				"          LATLONGLOCATION as string,",
+				"          VIOLATIONS as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DALLASSTG",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> VIOLDIM",
+				"source(output(",
+				"          DATE_ID as decimal(18,0),",
+				"          DT as date,",
+				"          DAY as decimal(2,0),",
+				"          MONTH as decimal(2,0),",
+				"          MONTH_NAME as string,",
+				"          YEAR as decimal(4,0),",
+				"          QUARTER as decimal(2,0),",
+				"          WEEK as decimal(2,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DATEDIM",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> BUSIDIM",
+				"ChicagoStg, LOCDIM join(ChicagoStg@ADDRESS == LOCDIM@ADDRESS,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, VIOLDIM join(select1@VIOLATION_DESC == VIOLDIM@VIOLATION_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2, DATEDIM join(INSPECTION_DATE == toString(DT),",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, BUSIDIM join(select1@DBA_NAME == BUSIDIM@DBA_NAME,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4, RISKDIM join(RISK == RISK_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"select1 keyGenerate(output(FACT_SK as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"join5 select(mapColumn(",
+				"          each(match(ERROR_FUNCTION('')),",
+				"               ERROR_FUNCTION('') = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          LOCATION_ID as decimal(38,0),",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          DATE_ID as decimal(38,0),",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          RISK_ID as decimal(38,0),",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSP_RESULT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> sink1"
 			]
 		}
 	}

@@ -1,0 +1,61 @@
+{
+	"name": "DATESF",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Food_Insp_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "DATE_ID",
+				"type": "NUMBER",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "DT",
+				"type": "DATE"
+			},
+			{
+				"name": "DAY",
+				"type": "NUMBER",
+				"precision": 2,
+				"scale": 0
+			},
+			{
+				"name": "MONTH",
+				"type": "NUMBER",
+				"precision": 2,
+				"scale": 0
+			},
+			{
+				"name": "MONTH_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "YEAR",
+				"type": "NUMBER",
+				"precision": 4,
+				"scale": 0
+			},
+			{
+				"name": "QUARTER",
+				"type": "NUMBER",
+				"precision": 2,
+				"scale": 0
+			},
+			{
+				"name": "WEEK",
+				"type": "NUMBER",
+				"precision": 2,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DIM_DATE"
+		}
+	}
+}
