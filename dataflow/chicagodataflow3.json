@@ -10,6 +10,41 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "LOCATIONSF",
+						"type": "DatasetReference"
+					},
+					"name": "LocationDim"
+				},
+				{
+					"dataset": {
+						"referenceName": "VioaltionSF",
+						"type": "DatasetReference"
+					},
+					"name": "ViolationDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "DATESF",
+						"type": "DatasetReference"
+					},
+					"name": "DATEDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "BuisnessSF",
+						"type": "DatasetReference"
+					},
+					"name": "BUISNESSDIM"
+				},
+				{
+					"dataset": {
+						"referenceName": "RISKsf",
+						"type": "DatasetReference"
+					},
+					"name": "RISKDIM"
 				}
 			],
 			"sinks": [
@@ -59,6 +94,67 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source1",
+				"source(output(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> LocationDim",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> ViolationDIM",
+				"source(output(",
+				"          DATE_ID as decimal(18,0),",
+				"          DT as date,",
+				"          DAY as decimal(2,0),",
+				"          MONTH as decimal(2,0),",
+				"          MONTH_NAME as string,",
+				"          YEAR as decimal(4,0),",
+				"          QUARTER as decimal(2,0),",
+				"          WEEK as decimal(2,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DATEDIM",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> BUISNESSDIM",
+				"source(output(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> RISKDIM",
 				"source1 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          INSPECTION_DATE,",

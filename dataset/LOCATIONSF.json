@@ -1,0 +1,73 @@
+{
+	"name": "LOCATIONSF",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "LOCATION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "ADDRESS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CITY",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STATE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ZIP",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LATITUDE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LONGITUDE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LOCATION",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_NUMBER",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_DIRECTION",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_UNIT",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DIM_LOCATION"
+		}
+	}
+}

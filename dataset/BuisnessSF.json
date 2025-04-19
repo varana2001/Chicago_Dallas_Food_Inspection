@@ -1,0 +1,45 @@
+{
+	"name": "BuisnessSF",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "BUISNESS_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "DBA_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "AKA_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUMBER",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "FACILITY_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "SOURCE_CITY",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DIM_BUISNESS"
+		}
+	}
+}
