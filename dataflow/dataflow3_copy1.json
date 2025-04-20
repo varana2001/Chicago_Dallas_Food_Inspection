@@ -104,6 +104,9 @@
 				},
 				{
 					"name": "surrogateKey1"
+				},
+				{
+					"name": "select11"
 				}
 			],
 			"scriptLines": [
@@ -319,9 +322,26 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join6",
-				"join6 keyGenerate(output(sk as long),",
+				"select11 keyGenerate(output(sk as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
+				"join6 select(mapColumn(",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER = select10@LICENSE_NUMBER,",
+				"          LOCATION_ID,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          INSPECTION_id,",
+				"          RISK_ID,",
+				"          RISK_DESC,",
+				"          LICENSE_NUMBER = source5@LICENSE_NUMBER,",
+				"          VIOLATION_ID,",
+				"          LICENSE_NUMBER = select6@LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select11",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
