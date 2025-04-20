@@ -75,9 +75,6 @@
 					"name": "join6"
 				},
 				{
-					"name": "select1"
-				},
-				{
 					"name": "select2"
 				},
 				{
@@ -91,6 +88,9 @@
 				},
 				{
 					"name": "select6"
+				},
+				{
+					"name": "select7"
 				}
 			],
 			"scriptLines": [
@@ -218,17 +218,11 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"select6, id join(select6@INSPECTION_DATE == id@INSPECTION_DATE,",
+				"select6, id join(select6@INSPECTION_ID == toString(id@INSPECTION_ID),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join6",
-				"join6 select(mapColumn(",
-				"          each(match(/* All input columns */ true()),",
-				"               /* Input name */ $$ = $$)",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
 				"chicagostg select(mapColumn(",
 				"          ROWID,",
 				"          INSPECTION_ID,",
@@ -285,7 +279,19 @@
 				"          DATE_ID",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select6"
+				"     skipDuplicateMapOutputs: true) ~> select6",
+				"join6 select(mapColumn(",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          RISK_ID,",
+				"          DATE_ID,",
+				"          INSPECTION_TYPE,",
+				"          INSPECTION_SCORE,",
+				"          INSPECTION_ID = select6@INSPECTION_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select7"
 			]
 		}
 	}
