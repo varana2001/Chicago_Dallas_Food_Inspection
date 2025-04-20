@@ -79,6 +79,18 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "select4"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "select6"
 				}
 			],
 			"scriptLines": [
@@ -191,22 +203,22 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2, ld join(select2@ADDRESS == ld@ADDRESS,",
+				"select3, ld join(select3@ADDRESS == ld@ADDRESS,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, vd join(select2@VIOLATION_DESC == vd@VIOLATION_DESC,",
+				"select4, vd join(select4@VIOLATION_DESC == vd@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"join4, dd join(INSPECTION_DATE == toString(DT),",
+				"select5, dd join(INSPECTION_DATE == toString(DT),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"join5, id join(select2@INSPECTION_ID == toString(id@INSPECTION_ID),",
+				"select6, id join(select6@INSPECTION_DATE == id@INSPECTION_DATE,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -229,7 +241,51 @@
 				"          DBA_NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2"
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"join2 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          ADDRESS,",
+				"          INSPECTION_DATE,",
+				"          VIOLATION_DESC,",
+				"          DBA_NAME = select2@DBA_NAME,",
+				"          BUISNESS_ID,",
+				"          DBA_NAME = bd@DBA_NAME,",
+				"          LICENSE_NUMBER = bd@LICENSE_NUMBER,",
+				"          RISK_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"join3 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTION_DATE,",
+				"          VIOLATION_DESC,",
+				"          BUISNESS_ID,",
+				"          RISK_ID,",
+				"          LOCATION_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"join4 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTION_DATE,",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          RISK_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"join5 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTION_DATE,",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          RISK_ID,",
+				"          DATE_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select6"
 			]
 		}
 	}
