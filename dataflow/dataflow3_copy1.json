@@ -17,6 +17,34 @@
 						"type": "DatasetReference"
 					},
 					"name": "source3"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable13",
+						"type": "DatasetReference"
+					},
+					"name": "source4"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable16",
+						"type": "DatasetReference"
+					},
+					"name": "source5"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable12",
+						"type": "DatasetReference"
+					},
+					"name": "source6"
+				},
+				{
+					"dataset": {
+						"referenceName": "stgchicagoSnowflakeTable",
+						"type": "DatasetReference"
+					},
+					"name": "chicagostg"
 				}
 			],
 			"sinks": [
@@ -25,7 +53,7 @@
 						"referenceName": "FACTSnowflakeTable",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "sink2"
 				}
 			],
 			"transformations": [
@@ -33,22 +61,52 @@
 					"name": "select1"
 				},
 				{
-					"name": "derivedColumn1"
-				},
-				{
 					"name": "join1"
 				},
 				{
-					"name": "select2"
+					"name": "select3"
 				},
 				{
-					"name": "aggregate1"
+					"name": "select4"
 				},
 				{
-					"name": "surrogateKey1"
+					"name": "select5"
 				},
 				{
-					"name": "derivedColumn2"
+					"name": "select6"
+				},
+				{
+					"name": "aggregate2"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "select7"
+				},
+				{
+					"name": "select8"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "select10"
+				},
+				{
+					"name": "join6"
+				},
+				{
+					"name": "surrogateKey2"
+				},
+				{
+					"name": "select11"
 				}
 			],
 			"scriptLines": [
@@ -86,6 +144,71 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source3",
+				"source(output(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source4",
+				"source(output(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source5",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source6",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS as string,",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> chicagostg",
 				"source2 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          INSPECTIONTYPE,",
@@ -95,32 +218,133 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(INSPECTION_ID = iif(isNull(INSPECTION_ID), -1, toInteger(INSPECTION_ID))) ~> derivedColumn1",
-				"derivedColumn1, source3 join(RESTAURANTNAME == DBA_NAME,",
+				"aggregate2, source3 join(RESTAURANTNAME == DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 select(mapColumn(",
-				"          INSPECTION_ID,",
-				"          INSPECTIONTYPE,",
-				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE,",
+				"source3 select(mapColumn(",
+				"          BUISNESS_ID,",
 				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 aggregate(groupBy(LICENSE_NUMBER,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"source4 select(mapColumn(",
+				"          LOCATION_ID,",
+				"          LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"source5 select(mapColumn(",
+				"          RISK_ID,",
+				"          LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"source6 select(mapColumn(",
+				"          VIOLATION_ID,",
+				"          LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select6",
+				"select1 aggregate(groupBy(RESTAURANTNAME,",
 				"          INSPECTION_ID,",
 				"          INSPECTIONTYPE,",
 				"          INSPECTIONDATE,",
 				"          INSPECTIONSCORE),",
-				"     number = first(LICENSE_NUMBER)) ~> aggregate1",
-				"aggregate1 keyGenerate(output(sk as long),",
-				"     startAt: 67899L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 derive(INSP_RESULT = \"0\") ~> derivedColumn2",
-				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     NAME = first(RESTAURANTNAME)) ~> aggregate2",
+				"select7, source4 join(select7@LICENSE_NUMBER == source4@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"select3, select8 join(select3@LICENSE_NUMBER == select8@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join1 select(mapColumn(",
+				"          RESTAURANTNAME,",
+				"          INSPECTION_ID,",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          NAME,",
+				"          BUISNESS_ID,",
+				"          DBA_NAME,",
+				"          AKA_NAME,",
+				"          LICENSE_NUMBER,",
+				"          FACILITY_TYPE,",
+				"          SOURCE_CITY",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select7",
+				"chicagostg select(mapColumn(",
+				"          ROWID,",
+				"          DBA_NAME,",
+				"          LICENSE_NUMBER,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          INSPECTION_id = INSPECTION_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select8",
+				"join2, join3 join(select7@LICENSE_NUMBER == select8@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"select10, source5 join(select10@LICENSE_NUMBER == source5@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join4 select(mapColumn(",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID = select7@BUISNESS_ID,",
+				"          LICENSE_NUMBER = select7@LICENSE_NUMBER,",
+				"          LOCATION_ID,",
+				"          LICENSE_NUMBER = source4@LICENSE_NUMBER,",
+				"          BUISNESS_ID = select3@BUISNESS_ID,",
+				"          LICENSE_NUMBER = select3@LICENSE_NUMBER,",
+				"          LICENSE_NUMBER = select8@LICENSE_NUMBER,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          INSPECTION_id = select8@INSPECTION_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select10",
+				"join5, select6 join(select10@LICENSE_NUMBER == select6@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join6",
+				"select11 keyGenerate(output(fact_sk as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey2",
+				"join6 select(mapColumn(",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER = select10@LICENSE_NUMBER,",
+				"          LOCATION_ID,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          INSPECTION_id,",
+				"          RISK_ID,",
+				"          RISK_DESC,",
+				"          LICENSE_NUMBER = source5@LICENSE_NUMBER,",
+				"          VIOLATION_ID,",
+				"          LICENSE_NUMBER = select6@LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select11",
+				"surrogateKey2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
@@ -145,14 +369,18 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          FACT_SK = sk,",
-				"          INSPECTION_ID,",
-				"          LICENSE_NUMBER,",
-				"          INSPECTION_DATE = INSPECTIONDATE,",
-				"          INSPECTION_TYPE = INSPECTIONTYPE,",
+				"          FACT_SK = fact_sk,",
+				"          INSPECTION_ID = INSPECTION_id,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          LICENSE_NUMBER = select10@LICENSE_NUMBER,",
+				"          BUISNESS_ID,",
+				"          RISK_ID,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
 				"          INSPECTION_SCORE = INSPECTIONSCORE,",
-				"          INSP_RESULT",
-				"     )) ~> sink1"
+				"          INSP_RESULT = RESULTS",
+				"     )) ~> sink2"
 			]
 		}
 	}
