@@ -10,12 +10,19 @@
 						"type": "DatasetReference"
 					},
 					"name": "DallasSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "BUSIDIM",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DIM_LOCATION",
+						"referenceName": "SnowflakeTable3",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -44,16 +51,10 @@
 					"name": "surrogateKey1"
 				},
 				{
-					"name": "window1"
-				},
-				{
-					"name": "filter1"
-				},
-				{
-					"name": "select4"
-				},
-				{
 					"name": "select5"
+				},
+				{
+					"name": "join1"
 				}
 			],
 			"scriptLines": [
@@ -83,6 +84,17 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> DallasSource",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source1",
 				"DallasSource select(mapColumn(",
 				"          RESTRAURANT_NAME = {Restaurant Name},",
 				"          ADDRESS = {Street Address},",
@@ -92,7 +104,8 @@
 				"          STREET_NAME = {Street Name},",
 				"          STREET_TYPE = {Street Type},",
 				"          STREET_DIRECTION = {Street Direction},",
-				"          STREET_UNIT = {Street Unit}",
+				"          STREET_UNIT = {Street Unit},",
+				"          {Restaurant Name}",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -114,7 +127,8 @@
 				"          STREET_NAME,",
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
+				"          STREET_UNIT,",
+				"          RESTRAURANT_NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
@@ -134,46 +148,29 @@
 				"          STREET_NAME,",
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
+				"          STREET_UNIT,",
+				"          NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
 				"select2 aggregate(groupBy(ADDRESS,",
 				"          CITY,",
 				"          STATE,",
-				"          ZIP),",
-				"     LATITUDE = first(LATITUDE),",
-				"          LONGITUDE = first(LONGITUDE),",
-				"          LOCATION = first(LOCATION),",
-				"          STREET_NUMBER = first(STREET_NUMBER),",
-				"          STREET_NAME = first(STREET_NAME),",
-				"          STREET_TYPE = first(STREET_TYPE),",
-				"          STREET_DIRECTION = first(STREET_DIRECTION),",
-				"          STREET_UNIT = first(STREET_UNIT)) ~> aggregate1",
-				"select4 keyGenerate(output(LOCATION_ID as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"select3 window(over(ADDRESS),",
-				"     asc(ADDRESS, true),",
-				"     rowNum = rowNumber()) ~> window1",
-				"window1 filter(rowNum == 1) ~> filter1",
-				"filter1 select(mapColumn(",
-				"          ADDRESS,",
-				"          CITY,",
-				"          STATE,",
 				"          ZIP,",
+				"          RESTRAURANT_NAME,",
 				"          LATITUDE,",
 				"          LONGITUDE,",
-				"          LOCATION,",
 				"          STREET_NUMBER,",
 				"          STREET_NAME,",
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select4",
-				"surrogateKey1 select(mapColumn(",
+				"          STREET_UNIT,",
+				"          LOCATION),",
+				"     NAME = first(RESTRAURANT_NAME)) ~> aggregate1",
+				"select3 keyGenerate(output(LOCATION_ID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"join1 select(mapColumn(",
 				"          ADDRESS,",
 				"          CITY,",
 				"          STATE,",
@@ -186,10 +183,16 @@
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
 				"          STREET_UNIT,",
-				"          LOCATION_ID",
+				"          LOCATION_ID,",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
+				"surrogateKey1, source1 join(NAME == DBA_NAME,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
 				"select5 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -205,7 +208,8 @@
 				"          STREET_NAME as string,",
 				"          STREET_TYPE as string,",
 				"          STREET_DIRECTION as string,",
-				"          STREET_UNIT as string",
+				"          STREET_UNIT as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -228,7 +232,8 @@
 				"          STREET_NAME,",
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
+				"          STREET_UNIT,",
+				"          LICENSE_NUMBER",
 				"     )) ~> sink1"
 			]
 		}

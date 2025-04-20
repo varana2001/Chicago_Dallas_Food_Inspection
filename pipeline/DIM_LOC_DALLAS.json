@@ -31,8 +31,6 @@
 			{
 				"name": "DIM_LOC_CHICAGo",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "DIM_LOC_DALLAS",

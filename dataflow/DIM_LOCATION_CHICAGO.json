@@ -22,7 +22,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DIM_LOCATION",
+						"referenceName": "SnowflakeTable2",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -52,12 +52,6 @@
 				},
 				{
 					"name": "derivedColumn3"
-				},
-				{
-					"name": "window1"
-				},
-				{
-					"name": "filter1"
 				},
 				{
 					"name": "select4"
@@ -105,7 +99,9 @@
 				"          LATITUDE,",
 				"          LONGITUDE,",
 				"          LOCATION,",
-				"          INSPECTION_ID",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          DBA_NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -120,7 +116,9 @@
 				"          LATITUDE,",
 				"          LONGITUDE,",
 				"          LOCATION,",
-				"          INSPECTION_ID",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          DBA_NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
@@ -142,7 +140,9 @@
 				"          STREET_DIRECTION,",
 				"          STREET_UNIT,",
 				"          STREET_NAME,",
-				"          INSPECTION_ID",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          DBA_NAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
@@ -155,12 +155,7 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
 				"surrogateKey1 derive(LOCATION_ID = ID + LOCATION_SK) ~> derivedColumn3",
-				"select3 window(over(ADDRESS),",
-				"     asc(ADDRESS, true),",
-				"     rowNum = rowNumber()) ~> window1",
-				"window1 filter(rowNum == 1",
-				") ~> filter1",
-				"filter1 select(mapColumn(",
+				"select3 select(mapColumn(",
 				"          ADDRESS,",
 				"          CITY,",
 				"          STATE,",
@@ -172,7 +167,8 @@
 				"          STREET_DIRECTION,",
 				"          STREET_TYPE,",
 				"          STREET_NAME,",
-				"          STREET_UNIT",
+				"          STREET_UNIT,",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
@@ -191,7 +187,8 @@
 				"          STREET_NAME as string,",
 				"          STREET_TYPE as string,",
 				"          STREET_DIRECTION as string,",
-				"          STREET_UNIT as string",
+				"          STREET_UNIT as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -214,7 +211,8 @@
 				"          STREET_NAME,",
 				"          STREET_TYPE,",
 				"          STREET_DIRECTION,",
-				"          STREET_UNIT",
+				"          STREET_UNIT,",
+				"          LICENSE_NUMBER",
 				"     )) ~> sink1"
 			]
 		}
