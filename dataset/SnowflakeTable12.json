@@ -1,0 +1,51 @@
+{
+	"name": "SnowflakeTable12",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "VIOLATION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "VIOLATION_CODE",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "VIOLATION_DESC",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "COMMENTS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "SOURCE_CITY",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "VIOLATION_POINTS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUMBER",
+				"type": "NUMBER",
+				"precision": 15,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "DIM_VIOLATION"
+		}
+	}
+}

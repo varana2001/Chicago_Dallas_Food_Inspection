@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "dim_Business",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -30,6 +37,12 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -59,6 +72,16 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source1",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source2",
 				"source1 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          INSPECTION_DATE,",
@@ -68,12 +91,23 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 keyGenerate(output(FACT_SK as long),",
+				"aggregate1 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(RESULTS = iif((RESULTS == \"Pass\"), 1, 0),",
 				"          INSPECTION_DATE = toDate(INSPECTION_DATE, 'MM/dd/yyyy'),",
 				"          INSPECTION_SCORE = 0) ~> derivedColumn1",
+				"select1, source2 join(select1@LICENSE_NUMBER == source2@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 aggregate(groupBy(INSPECTION_ID,",
+				"          INSPECTION_DATE,",
+				"          INSPECTION_TYPE,",
+				"          RESULTS,",
+				"          select1@LICENSE_NUMBER),",
+				"     number = first(source2@LICENSE_NUMBER)) ~> aggregate1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -101,10 +135,11 @@
 				"     mapColumn(",
 				"          FACT_SK,",
 				"          INSPECTION_ID,",
-				"          INSPECTION_TYPE,",
+				"          LICENSE_NUMBER,",
 				"          INSPECTION_DATE,",
-				"          INSP_RESULT = RESULTS,",
-				"          LICENSE_NUMBER",
+				"          INSPECTION_TYPE,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT = RESULTS",
 				"     )) ~> sink1"
 			]
 		}

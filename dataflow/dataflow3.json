@@ -17,13 +17,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "source3"
-				},
-				{
-					"dataset": {
-						"referenceName": "FACTSnowflakeTable",
-						"type": "DatasetReference"
-					},
-					"name": "source4"
 				}
 			],
 			"sinks": [
@@ -49,13 +42,13 @@
 					"name": "select2"
 				},
 				{
-					"name": "surrogateKey2"
+					"name": "aggregate1"
+				},
+				{
+					"name": "surrogateKey1"
 				},
 				{
 					"name": "derivedColumn2"
-				},
-				{
-					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -93,10 +86,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source3",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     query: 'select max(fact_sk) as id\\nfrom fct_insp',",
-				"     format: 'query') ~> source4",
 				"source2 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          INSPECTIONTYPE,",
@@ -121,15 +110,17 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 keyGenerate(output(FACT_SK as long),",
-				"     startAt: 90008L,",
-				"     stepValue: 1L) ~> surrogateKey2",
-				"surrogateKey2 derive(INSP_RESULT = \"0\") ~> derivedColumn2",
-				"derivedColumn2 aggregate(groupBy(INSPECTIONSCORE,",
-				"          FACT_SK,",
-				"          INSP_RESULT),",
+				"select2 aggregate(groupBy(LICENSE_NUMBER,",
+				"          INSPECTION_ID,",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE),",
 				"     number = first(LICENSE_NUMBER)) ~> aggregate1",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"aggregate1 keyGenerate(output(sk as long),",
+				"     startAt: 67899L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(INSP_RESULT = \"0\") ~> derivedColumn2",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
@@ -154,8 +145,11 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          FACT_SK,",
-				"          LICENSE_NUMBER = number,",
+				"          FACT_SK = sk,",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          INSPECTION_DATE = INSPECTIONDATE,",
+				"          INSPECTION_TYPE = INSPECTIONTYPE,",
 				"          INSPECTION_SCORE = INSPECTIONSCORE,",
 				"          INSP_RESULT",
 				"     )) ~> sink1"
