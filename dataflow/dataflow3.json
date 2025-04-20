@@ -126,7 +126,7 @@
 				"select2 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 90008L,",
 				"     stepValue: 1L) ~> surrogateKey2",
-				"surrogateKey2 derive(INSP_RESULT = \"None\") ~> derivedColumn2",
+				"surrogateKey2 derive(INSP_RESULT = \"0\") ~> derivedColumn2",
 				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
