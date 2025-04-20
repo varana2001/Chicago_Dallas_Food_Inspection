@@ -1,0 +1,220 @@
+{
+	"name": "Fact",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CHICAGOSTAGESF",
+						"type": "DatasetReference"
+					},
+					"name": "chicagostg"
+				},
+				{
+					"dataset": {
+						"referenceName": "BUSIDIM",
+						"type": "DatasetReference"
+					},
+					"name": "bd"
+				},
+				{
+					"dataset": {
+						"referenceName": "RISK_DIM",
+						"type": "DatasetReference"
+					},
+					"name": "rd"
+				},
+				{
+					"dataset": {
+						"referenceName": "DIM_LOCATION",
+						"type": "DatasetReference"
+					},
+					"name": "ld"
+				},
+				{
+					"dataset": {
+						"referenceName": "VIOLSF",
+						"type": "DatasetReference"
+					},
+					"name": "vd"
+				},
+				{
+					"dataset": {
+						"referenceName": "DATESF",
+						"type": "DatasetReference"
+					},
+					"name": "dd"
+				},
+				{
+					"dataset": {
+						"referenceName": "InspectionSF",
+						"type": "DatasetReference"
+					},
+					"name": "id"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "join6"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS as string,",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> chicagostg",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> bd",
+				"source(output(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> rd",
+				"source(output(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> ld",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(15,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> vd",
+				"source(output(",
+				"          DATE_ID as decimal(18,0),",
+				"          DT as date,",
+				"          DAY as decimal(2,0),",
+				"          MONTH as decimal(2,0),",
+				"          MONTH_NAME as string,",
+				"          YEAR as decimal(4,0),",
+				"          QUARTER as decimal(2,0),",
+				"          WEEK as decimal(2,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> dd",
+				"source(output(",
+				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          LOCATION_ID as decimal(38,0),",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          RISK_ID as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> id",
+				"chicagostg, bd join(chicagostg@DBA_NAME == bd@DBA_NAME,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, rd join(RISK == RISK_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2, ld join(chicagostg@ADDRESS == ld@ADDRESS,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, vd join(chicagostg@VIOLATION_DESC == vd@VIOLATION_DESC,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4, dd join(INSPECTION_DATE == toString(DT),",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join5, id join(chicagostg@INSPECTION_ID == toString(id@INSPECTION_ID),",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join6",
+				"join6 select(mapColumn(",
+				"          each(match(/* All input columns */ true()),",
+				"               /* Input name */ $$ = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1"
+			]
+		}
+	}
+}
