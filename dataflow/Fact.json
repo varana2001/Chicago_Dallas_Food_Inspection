@@ -48,7 +48,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "InspectionSF",
+						"referenceName": "InspectSF",
 						"type": "DatasetReference"
 					},
 					"name": "id"
@@ -76,6 +76,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -167,18 +170,18 @@
 				"     validateSchema: false,",
 				"     format: 'table') ~> dd",
 				"source(output(",
-				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_SK as decimal(38,0),",
 				"          INSPECTION_ID as decimal(38,0),",
-				"          LOCATION_ID as decimal(38,0),",
-				"          VIOLATION_ID as decimal(38,0),",
-				"          LICENSE_NUMBER as decimal(38,0),",
-				"          BUISNESS_ID as decimal(38,0),",
-				"          RISK_ID as decimal(38,0)",
+				"          INSPECTION_TYPE as string,",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSP_RESULT as string,",
+				"          LICENSE_NUMBER as decimal(38,0)",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> id",
-				"chicagostg, bd join(chicagostg@DBA_NAME == bd@DBA_NAME,",
+				"select2, bd join(select2@DBA_NAME == bd@DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -188,12 +191,12 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2, ld join(chicagostg@ADDRESS == ld@ADDRESS,",
+				"join2, ld join(select2@ADDRESS == ld@ADDRESS,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, vd join(chicagostg@VIOLATION_DESC == vd@VIOLATION_DESC,",
+				"join3, vd join(select2@VIOLATION_DESC == vd@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -203,7 +206,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"join5, id join(chicagostg@INSPECTION_ID == toString(id@INSPECTION_ID),",
+				"join5, id join(select2@INSPECTION_ID == toString(id@INSPECTION_ID),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -213,7 +216,20 @@
 				"               /* Input name */ $$ = $$)",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"chicagostg select(mapColumn(",
+				"          ROWID,",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          RISK,",
+				"          ADDRESS,",
+				"          INSPECTION_DATE,",
+				"          RESULTS,",
+				"          VIOLATION_DESC,",
+				"          DBA_NAME",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2"
 			]
 		}
 	}
