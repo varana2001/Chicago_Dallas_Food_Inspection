@@ -1,0 +1,166 @@
+{
+	"name": "dataflow3",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable9",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable10",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				},
+				{
+					"dataset": {
+						"referenceName": "FACTSnowflakeTable",
+						"type": "DatasetReference"
+					},
+					"name": "source4"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "FACTSnowflakeTable",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "surrogateKey2"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          RESTAURANTNAME as string,",
+				"          INSPECTIONTYPE as string,",
+				"          INSPECTIONDATE as string,",
+				"          INSPECTIONSCORE as string,",
+				"          STREETNUMBER as string,",
+				"          STREETNAME as string,",
+				"          STREETDIRECTION as string,",
+				"          STREETTYPE as string,",
+				"          STREETUNIT as string,",
+				"          STREETADDRESS as string,",
+				"          ZIPCODE as string,",
+				"          INSPECTIONMONTH as string,",
+				"          INSPECTIONYEAR as string,",
+				"          LATLONGLOCATION as string,",
+				"          VIOLATIONS as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source2",
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source3",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     query: 'select max(fact_sk) as id\\nfrom fct_insp',",
+				"     format: 'query') ~> source4",
+				"source2 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(INSPECTION_ID = iif(isNull(INSPECTION_ID), -1, toInteger(INSPECTION_ID))) ~> derivedColumn1",
+				"derivedColumn1 keyGenerate(output(LICENSE_NUMBER as long),",
+				"     startAt: 10001L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1, source3 join(surrogateKey1@LICENSE_NUMBER == source3@LICENSE_NUMBER,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONTYPE,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          LICENSE_NUMBER = source3@LICENSE_NUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 keyGenerate(output(FACT_SK as long),",
+				"     startAt: 90008L,",
+				"     stepValue: 1L) ~> surrogateKey2",
+				"surrogateKey2 derive(INSP_RESULT = \"None\") ~> derivedColumn2",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          LOCATION_ID as decimal(38,0),",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          DATE_ID as decimal(38,0),",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          RISK_ID as decimal(38,0),",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSP_RESULT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          FACT_SK,",
+				"          INSPECTION_ID,",
+				"          LICENSE_NUMBER,",
+				"          INSPECTION_DATE = INSPECTIONDATE,",
+				"          INSPECTION_TYPE = INSPECTIONTYPE,",
+				"          INSPECTION_SCORE = INSPECTIONSCORE,",
+				"          INSP_RESULT",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

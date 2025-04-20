@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTablefact",
+						"referenceName": "FACTSnowflakeTable",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -63,7 +63,8 @@
 				"          INSPECTION_ID,",
 				"          INSPECTION_DATE,",
 				"          INSPECTION_TYPE,",
-				"          RESULTS",
+				"          RESULTS,",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -79,6 +80,7 @@
 				"          INSPECTION_ID as decimal(38,0),",
 				"          LOCATION_ID as decimal(38,0),",
 				"          VIOLATION_ID as decimal(38,0),",
+				"          LICENSE_NUMBER as decimal(38,0),",
 				"          DATE_ID as decimal(38,0),",
 				"          BUISNESS_ID as decimal(38,0),",
 				"          RISK_ID as decimal(38,0),",
@@ -96,11 +98,12 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
+				"          FACT_SK,",
 				"          INSPECTION_ID,",
 				"          INSPECTION_TYPE,",
 				"          INSPECTION_DATE,",
 				"          INSP_RESULT = RESULTS,",
-				"          FACT_SK",
+				"          LICENSE_NUMBER",
 				"     )) ~> sink1"
 			]
 		}
