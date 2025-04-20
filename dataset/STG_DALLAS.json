@@ -1,0 +1,19 @@
+{
+	"name": "STG_DALLAS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinspectionLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "silver"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
