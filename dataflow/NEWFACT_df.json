@@ -38,17 +38,16 @@
 						"type": "DatasetReference"
 					},
 					"name": "source5"
-				}
-			],
-			"sinks": [
+				},
 				{
 					"dataset": {
 						"referenceName": "fact_final",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "source6"
 				}
 			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "select1"
@@ -87,7 +86,7 @@
 					"name": "join4"
 				},
 				{
-					"name": "surrogateKey1"
+					"name": "join5"
 				}
 			],
 			"scriptLines": [
@@ -153,6 +152,18 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source5",
+				"source(output(",
+				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          LOCATION_ID as decimal(38,0),",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          RISK_ID as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source6",
 				"source1 select(mapColumn(",
 				"          BUISNESS_ID,",
 				"          LICENSE_NUMBER",
@@ -227,34 +238,11 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"join4 keyGenerate(output(fact_sk as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          FACT_SK as decimal(38,0),",
-				"          INSPECTION_ID as decimal(38,0),",
-				"          LOCATION_ID as decimal(38,0),",
-				"          VIOLATION_ID as decimal(38,0),",
-				"          LICENSE_NUMBER as decimal(38,0),",
-				"          BUISNESS_ID as decimal(38,0),",
-				"          RISK_ID as decimal(38,0)",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     stageInsert: true,",
-				"     mapColumn(",
-				"          LOCATION_ID,",
-				"          VIOLATION_ID,",
-				"          BUISNESS_ID,",
-				"          RISK_ID",
-				"     )) ~> sink1"
+				"source6, join4 join(source6@LICENSE_NUMBER == ERROR_FUNCTION(''),",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5"
 			]
 		}
 	}
