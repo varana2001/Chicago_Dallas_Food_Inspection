@@ -306,17 +306,10 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          FACT_SK = sk,",
-				"          INSPECTION_ID,",
 				"          LOCATION_ID,",
 				"          VIOLATION_ID,",
-				"          LICENSE_NUMBER = select5@LICENSE_NUMBER,",
 				"          BUISNESS_ID,",
-				"          RISK_ID,",
-				"          INSPECTION_DATE = INSPECTIONDATE,",
-				"          INSPECTION_TYPE = INSPECTIONTYPE,",
-				"          INSPECTION_SCORE = INSPECTIONSCORE,",
-				"          INSP_RESULT",
+				"          RISK_ID",
 				"     )) ~> sink1"
 			]
 		}
