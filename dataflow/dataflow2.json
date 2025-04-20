@@ -53,6 +53,9 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "surrogateKey2"
 				}
 			],
 			"scriptLines": [
@@ -124,7 +127,12 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"surrogateKey1 derive(SK = MAX+ SKK) ~> derivedColumn1",
+				"surrogateKey2 derive(SK = MAX+ SKK,",
+				"          result = \"-1\",",
+				"          INSPECTIONTYPE = iif(isNull(INSPECTIONTYPE), \"None\", INSPECTIONTYPE)) ~> derivedColumn1",
+				"surrogateKey1 keyGenerate(output(Inspection_id as long),",
+				"     startAt: 87715L,",
+				"     stepValue: 1L) ~> surrogateKey2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -146,11 +154,12 @@
 				"     stageInsert: true,",
 				"     mapColumn(",
 				"          INSPECTION_SK = SK,",
-				"          INSPECTION_ID,",
+				"          INSPECTION_ID = surrogateKey2@Inspection_id,",
 				"          INSPECTION_TYPE = INSPECTIONTYPE,",
 				"          INSPECTION_DATE = INSPECTIONDATE,",
 				"          INSPECTION_SCORE = INSPECTIONSCORE,",
-				"          LICENSE_NUMBER",
+				"          LICENSE_NUMBER,",
+				"          INSP_RESULT = result",
 				"     )) ~> sink1"
 			]
 		}
