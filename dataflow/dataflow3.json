@@ -43,9 +43,6 @@
 					"name": "derivedColumn1"
 				},
 				{
-					"name": "surrogateKey1"
-				},
-				{
 					"name": "join1"
 				},
 				{
@@ -101,15 +98,13 @@
 				"          INSPECTION_ID,",
 				"          INSPECTIONTYPE,",
 				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE",
+				"          INSPECTIONSCORE,",
+				"          RESTAURANTNAME",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 derive(INSPECTION_ID = iif(isNull(INSPECTION_ID), -1, toInteger(INSPECTION_ID))) ~> derivedColumn1",
-				"derivedColumn1 keyGenerate(output(LICENSE_NUMBER as long),",
-				"     startAt: 10001L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1, source3 join(surrogateKey1@LICENSE_NUMBER == source3@LICENSE_NUMBER,",
+				"derivedColumn1, source3 join(RESTAURANTNAME == DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -119,7 +114,7 @@
 				"          INSPECTIONTYPE,",
 				"          INSPECTIONDATE,",
 				"          INSPECTIONSCORE,",
-				"          LICENSE_NUMBER = source3@LICENSE_NUMBER",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
