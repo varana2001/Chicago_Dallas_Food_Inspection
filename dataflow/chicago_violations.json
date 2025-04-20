@@ -40,6 +40,9 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -93,7 +96,11 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 derive(Source_city = \"Chicago\") ~> derivedColumn2",
+				"surrogateKey1 derive(Source_city = \"Chicago\",",
+				"          ID = ID + sk) ~> derivedColumn2",
+				"join1 keyGenerate(output(sk as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
 				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
