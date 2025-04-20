@@ -54,7 +54,15 @@
 					"name": "id"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "FACTSF",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "join1"
@@ -200,34 +208,33 @@
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1",
+				"     broadcast: 'right')~> join1",
 				"join1, rd join(RISK == RISK_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join2",
+				"     broadcast: 'right')~> join2",
 				"select3, ld join(select3@ADDRESS == ld@ADDRESS,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join3",
+				"     broadcast: 'right')~> join3",
 				"select4, vd join(select4@VIOLATION_DESC == vd@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join4",
+				"     broadcast: 'right')~> join4",
 				"select5, dd join(INSPECTION_DATE == toString(DT),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join5",
+				"     broadcast: 'right')~> join5",
 				"select6, id join(select6@INSPECTION_ID == toString(id@INSPECTION_ID),",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join6",
+				"     broadcast: 'right')~> join6",
 				"chicagostg select(mapColumn(",
-				"          ROWID,",
 				"          INSPECTION_ID,",
 				"          LICENSE_NUMBER,",
 				"          RISK,",
@@ -249,6 +256,9 @@
 				"          DBA_NAME = bd@DBA_NAME,",
 				"          LICENSE_NUMBER = bd@LICENSE_NUMBER,",
 				"          RISK_ID",
+				"     ),",
+				"     partitionBy('hash', 2,",
+				"          INSPECTION_ID",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
@@ -297,7 +307,30 @@
 				"     skipDuplicateMapOutputs: true) ~> select7",
 				"select7 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1"
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          FACT_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          LOCATION_ID as decimal(38,0),",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          DATE_ID as decimal(38,0),",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          RISK_ID as decimal(38,0),",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSP_RESULT as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> sink1"
 			]
 		}
 	}
