@@ -53,6 +53,9 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -122,7 +125,11 @@
 				"     startAt: 90008L,",
 				"     stepValue: 1L) ~> surrogateKey2",
 				"surrogateKey2 derive(INSP_RESULT = \"0\") ~> derivedColumn2",
-				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"derivedColumn2 aggregate(groupBy(INSPECTIONSCORE,",
+				"          FACT_SK,",
+				"          INSP_RESULT),",
+				"     number = first(LICENSE_NUMBER)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
@@ -148,10 +155,7 @@
 				"     stageInsert: true,",
 				"     mapColumn(",
 				"          FACT_SK,",
-				"          INSPECTION_ID,",
-				"          LICENSE_NUMBER,",
-				"          INSPECTION_DATE = INSPECTIONDATE,",
-				"          INSPECTION_TYPE = INSPECTIONTYPE,",
+				"          LICENSE_NUMBER = number,",
 				"          INSPECTION_SCORE = INSPECTIONSCORE,",
 				"          INSP_RESULT",
 				"     )) ~> sink1"
