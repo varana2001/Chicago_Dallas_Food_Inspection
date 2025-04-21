@@ -22,7 +22,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable2",
+						"referenceName": "locchi",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -186,9 +186,9 @@
 				"          STREET_NUMBER as string,",
 				"          STREET_NAME as string,",
 				"          STREET_TYPE as string,",
+				"          LICENSE_NUMBER as decimal(15,0),",
 				"          STREET_DIRECTION as string,",
-				"          STREET_UNIT as string,",
-				"          LICENSE_NUMBER as decimal(15,0)",
+				"          STREET_UNIT as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
