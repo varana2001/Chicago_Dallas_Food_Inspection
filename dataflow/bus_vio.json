@@ -253,8 +253,7 @@
 				"          VIOLATION_ID,",
 				"          LICENSE_NUMBER,",
 				"          BUISNESS_ID,",
-				"          RISK_ID,",
-				"          INSPECTION_DATE",
+				"          RISK_ID",
 				"     )) ~> sink1"
 			]
 		}
