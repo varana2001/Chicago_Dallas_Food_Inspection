@@ -13,42 +13,42 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "BUSIDIM",
+						"referenceName": "BDIM1",
 						"type": "DatasetReference"
 					},
 					"name": "bd"
 				},
 				{
 					"dataset": {
-						"referenceName": "RISK_DIM",
+						"referenceName": "RDIM",
 						"type": "DatasetReference"
 					},
 					"name": "rd"
 				},
 				{
 					"dataset": {
-						"referenceName": "DIM_LOCATION",
+						"referenceName": "LDIM1",
 						"type": "DatasetReference"
 					},
 					"name": "ld"
 				},
 				{
 					"dataset": {
-						"referenceName": "VIOLSF",
+						"referenceName": "VDIM1",
 						"type": "DatasetReference"
 					},
 					"name": "vd"
 				},
 				{
 					"dataset": {
-						"referenceName": "DATESF",
+						"referenceName": "DDIM",
 						"type": "DatasetReference"
 					},
 					"name": "dd"
 				},
 				{
 					"dataset": {
-						"referenceName": "InspectSF",
+						"referenceName": "IDIM1",
 						"type": "DatasetReference"
 					},
 					"name": "id"
@@ -86,9 +86,6 @@
 					"name": "select2"
 				},
 				{
-					"name": "select7"
-				},
-				{
 					"name": "surrogateKey1"
 				},
 				{
@@ -96,6 +93,12 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "select4"
 				}
 			],
 			"scriptLines": [
@@ -129,7 +132,6 @@
 				"          BUISNESS_ID as decimal(38,0),",
 				"          DBA_NAME as string,",
 				"          AKA_NAME as string,",
-				"          LICENSE_NUMBER as decimal(38,0),",
 				"          FACILITY_TYPE as string,",
 				"          SOURCE_CITY as string",
 				"     ),",
@@ -167,8 +169,7 @@
 				"          VIOLATION_DESC as string,",
 				"          COMMENTS as string,",
 				"          SOURCE_CITY as string,",
-				"          VIOLATION_POINTS as string,",
-				"          LICENSE_NUMBER as decimal(15,0)",
+				"          VIOLATION_POINTS as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -192,8 +193,7 @@
 				"          INSPECTION_TYPE as string,",
 				"          INSPECTION_DATE as string,",
 				"          INSPECTION_SCORE as decimal(38,0),",
-				"          INSP_RESULT as string,",
-				"          LICENSE_NUMBER as decimal(38,0)",
+				"          INSP_RESULT as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -213,17 +213,17 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3, vd join(aggregate1@VIOLATION_DESC == vd@VIOLATION_DESC,",
+				"select4, rd join(RISK == RISK_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"join4, rd join(RISK == RISK_DESC,",
+				"join4, id join(select4@INSPECTION_DATE == id@INSPECTION_DATE,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"join5, id join(aggregate1@INSPECTION_DATE == id@INSPECTION_DATE,",
+				"join5, vd join(select4@VIOLATION_DESC == vd@VIOLATION_DESC,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -235,22 +235,12 @@
 				"          INSPECTION_DATE,",
 				"          RESULTS,",
 				"          VIOLATION_DESC,",
-				"          DBA_NAME",
+				"          DBA_NAME,",
+				"          COMMENTS",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"join6 select(mapColumn(",
-				"          BUISNESS_ID,",
-				"          LOCATION_ID,",
-				"          VIOLATION_ID,",
-				"          RISK_ID,",
-				"          DATE_ID,",
-				"          INSPECTION_ID = select6@INSPECTION_ID,",
-				"          LICENSE_NUMBER = id@LICENSE_NUMBER",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select7",
-				"select7 keyGenerate(output(FACT_SK as long),",
+				"select3 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"select2 aggregate(groupBy(RISK,",
@@ -261,6 +251,28 @@
 				"          VIOLATION_DESC = first(VIOLATION_DESC),",
 				"          DBA_NAME = first(DBA_NAME)) ~> aggregate1",
 				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
+				"join6 select(mapColumn(",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          DATE_ID,",
+				"          VIOLATION_ID,",
+				"          RISK_ID,",
+				"          INSPECTION_SK,",
+				"          INSPECTION_SCORE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"join3 select(mapColumn(",
+				"          RISK,",
+				"          LICENSE_NUMBER,",
+				"          INSPECTION_DATE,",
+				"          VIOLATION_DESC,",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          DATE_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
