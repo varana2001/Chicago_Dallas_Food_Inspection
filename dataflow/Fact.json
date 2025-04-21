@@ -52,19 +52,12 @@
 						"type": "DatasetReference"
 					},
 					"name": "id"
-				},
-				{
-					"dataset": {
-						"referenceName": "DallasSTGSF",
-						"type": "DatasetReference"
-					},
-					"name": "source1"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "FACTSF",
+						"referenceName": "FACT",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -114,28 +107,13 @@
 					"name": "select8"
 				},
 				{
-					"name": "select9"
+					"name": "lookup1"
 				},
 				{
-					"name": "join8"
+					"name": "window1"
 				},
 				{
-					"name": "select10"
-				},
-				{
-					"name": "derivedColumn3"
-				},
-				{
-					"name": "select11"
-				},
-				{
-					"name": "aggregate2"
-				},
-				{
-					"name": "aggregate3"
-				},
-				{
-					"name": "join9"
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -237,29 +215,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> id",
-				"source(output(",
-				"          ROWID as decimal(38,0),",
-				"          INSPECTION_ID as string,",
-				"          RESTAURANTNAME as string,",
-				"          INSPECTIONTYPE as string,",
-				"          INSPECTIONDATE as string,",
-				"          INSPECTIONSCORE as string,",
-				"          STREETNUMBER as string,",
-				"          STREETNAME as string,",
-				"          STREETDIRECTION as string,",
-				"          STREETTYPE as string,",
-				"          STREETUNIT as string,",
-				"          STREETADDRESS as string,",
-				"          ZIPCODE as string,",
-				"          INSPECTIONMONTH as string,",
-				"          INSPECTIONYEAR as string,",
-				"          LATLONGLOCATION as string,",
-				"          VIOLATIONS as string,",
-				"          COMMENTS as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     format: 'table') ~> source1",
 				"select2, bd join(select2@DBA_NAME == bd@DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
@@ -298,11 +253,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select3 keyGenerate(output(FACT_SK as long),",
+				"filter1 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
-				"join9 select(mapColumn(",
+				"lookup1 select(mapColumn(",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
 				"          DATE_ID,",
@@ -328,14 +283,14 @@
 				"     skipDuplicateMapOutputs: true) ~> select4",
 				"join5 select(mapColumn(",
 				"          LICENSE_NUMBER,",
-				"          VIOLATION_DESC,",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
 				"          DATE_ID,",
 				"          RISK_ID,",
 				"          INSPECTION_SK,",
 				"          INSPECTION_SCORE,",
-				"          VIOLATION_CODE",
+				"          VIOLATION_CODE,",
+				"          VIOLATION_DESC",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
@@ -373,76 +328,32 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
-				"source1 select(mapColumn(",
-				"          INSPECTION_ID,",
-				"          RESTAURANTNAME,",
-				"          INSPECTIONTYPE,",
-				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE,",
-				"          VIOLATIONS,",
-				"          COMMENTS",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select9",
-				"select9, bd join(RESTAURANTNAME == DBA_NAME,",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join8",
-				"join8 select(mapColumn(",
-				"          INSPECTION_ID,",
-				"          RESTAURANTNAME,",
-				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE,",
-				"          BUISNESS_ID,",
-				"          DBA_NAME,",
-				"          LICENSE_NUMBER",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select10",
-				"select10 derive(INSPECTIONDATE = toString(toDate(INSPECTIONDATE, 'yyyy-MM-dd'), 'MM/dd/yyyy')",
-				") ~> derivedColumn3",
-				"derivedColumn3 select(mapColumn(",
-				"          INSPECTION_ID,",
-				"          RESTAURANTNAME,",
-				"          INSPECTIONDATE,",
-				"          INSPECTIONSCORE,",
-				"          BUISNESS_ID,",
-				"          DBA_NAME,",
-				"          LICENSE_NUMBER",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select11",
-				"select11 aggregate(groupBy(RESTAURANTNAME),",
-				"     DBA_NAME = first(DBA_NAME)) ~> aggregate2",
-				"surrogateKey1 aggregate(groupBy(BUISNESS_ID,",
-				"          LOCATION_ID,",
-				"          DATE_ID,",
-				"          RISK_ID,",
-				"          VIOLATION_ID,",
-				"          INSPECTION_SCORE,",
-				"          INSPECTION_SK,",
-				"          FACT_SK),",
-				"     LICENSE_NUMBER = first(LICENSE_NUMBER)) ~> aggregate3",
-				"select5, vd join(select5@VIOLATION_CODE == vd@VIOLATION_CODE,",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'right')~> join9",
-				"aggregate3 sink(allowSchemaDrift: true,",
+				"select5, vd lookup(select5@VIOLATION_CODE == vd@VIOLATION_CODE",
+				"     && select5@LICENSE_NUMBER == vd@LICENSE_NUMBER,",
+				"     multiple: false,",
+				"     pickup: 'first',",
+				"     asc(vd@LICENSE_NUMBER, true),",
+				"     broadcast: 'auto')~> lookup1",
+				"select3 window(over(VIOLATION_ID,",
+				"          LICENSE_NUMBER),",
+				"     asc(INSPECTION_SK, true),",
+				"     rowNumber = rowNumber()) ~> window1",
+				"window1 filter(rowNumber == 1 ",
+				"&& !isNull(VIOLATION_ID) ",
+				"&& !isNull(LICENSE_NUMBER) ",
+				"&& !isNull(INSPECTION_SK) ",
+				"&& !isNull(DATE_ID)) ~> filter1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
 				"          INSPECTION_ID as decimal(38,0),",
 				"          LOCATION_ID as decimal(38,0),",
 				"          VIOLATION_ID as decimal(38,0),",
-				"          DATE_ID as decimal(38,0),",
 				"          BUISNESS_ID as decimal(38,0),",
-				"          RISK_ID as decimal(38,0),",
-				"          INSPECTION_DATE as date,",
-				"          INSPECTION_TYPE as string,",
+				"          DATE_ID as decimal(38,0),",
 				"          INSPECTION_SCORE as decimal(38,0),",
-				"          INSP_RESULT as string",
+				"          RISK_ID as decimal(38,0)",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -451,7 +362,17 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     stageInsert: true) ~> sink1"
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          FACT_SK,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          DATE_ID,",
+				"          BUISNESS_ID,",
+				"          RISK_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSPECTION_ID = INSPECTION_SK",
+				"     )) ~> sink1"
 			]
 		}
 	}
