@@ -87,6 +87,9 @@
 				},
 				{
 					"name": "surrogateKey1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -236,9 +239,16 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select10",
-				"select10 keyGenerate(output(Fact_SK as long),",
+				"aggregate1 keyGenerate(output(Fact_SK as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
+				"select10 aggregate(groupBy(INSPECTION_SK,",
+				"          LICENSE_NUMBER,",
+				"          BUISNESS_ID,",
+				"          VIOLATION_ID,",
+				"          LOCATION_ID,",
+				"          RISK_ID),",
+				"     NUMBER = first(LICENSE_NUMBER)) ~> aggregate1",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     skipDuplicateMapInputs: true,",
