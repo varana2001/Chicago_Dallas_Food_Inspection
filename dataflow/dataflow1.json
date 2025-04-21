@@ -22,7 +22,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable4",
+						"referenceName": "SnowflakeTable5",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -118,8 +118,7 @@
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(ins_id = toInteger(ins_id),",
-				"          score = \r",
-				"-1) ~> derivedColumn1",
+				"          score = -1) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -128,8 +127,8 @@
 				"          INSPECTION_TYPE as string,",
 				"          INSPECTION_DATE as string,",
 				"          INSPECTION_SCORE as decimal(38,0),",
-				"          INSP_RESULT as string,",
-				"          LICENSE_NUMBER as decimal(38,0)",
+				"          LICENSE_NUMBER as decimal(15,0),",
+				"          INSP_RESULT as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",

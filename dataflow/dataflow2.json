@@ -20,7 +20,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable4",
+						"referenceName": "SnowflakeTable5",
 						"type": "DatasetReference"
 					},
 					"name": "source3"
@@ -29,7 +29,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable4",
+						"referenceName": "SnowflakeTable5",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -97,7 +97,7 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     query: 'SELECT(MAX(INSPECTION_SK)) AS MAX FROM DIM_INSPECTION',",
+				"     query: 'SELECT(MAX(INSPECTION_SK)) AS MAX FROM INSPECTION',",
 				"     format: 'query') ~> source3",
 				"source1 select(mapColumn(",
 				"          INSPECTION_ID,",
@@ -141,8 +141,8 @@
 				"          INSPECTION_TYPE as string,",
 				"          INSPECTION_DATE as string,",
 				"          INSPECTION_SCORE as decimal(38,0),",
-				"          INSP_RESULT as string,",
-				"          LICENSE_NUMBER as decimal(38,0)",
+				"          LICENSE_NUMBER as decimal(15,0),",
+				"          INSP_RESULT as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
