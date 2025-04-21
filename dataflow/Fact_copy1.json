@@ -1,0 +1,296 @@
+{
+	"name": "Fact_copy1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "BDIM2",
+						"type": "DatasetReference"
+					},
+					"name": "bd"
+				},
+				{
+					"dataset": {
+						"referenceName": "RDIM",
+						"type": "DatasetReference"
+					},
+					"name": "rd"
+				},
+				{
+					"dataset": {
+						"referenceName": "LDIM1",
+						"type": "DatasetReference"
+					},
+					"name": "ld"
+				},
+				{
+					"dataset": {
+						"referenceName": "VDIM2",
+						"type": "DatasetReference"
+					},
+					"name": "vd"
+				},
+				{
+					"dataset": {
+						"referenceName": "DDIM",
+						"type": "DatasetReference"
+					},
+					"name": "dd"
+				},
+				{
+					"dataset": {
+						"referenceName": "IDIM1",
+						"type": "DatasetReference"
+					},
+					"name": "id"
+				},
+				{
+					"dataset": {
+						"referenceName": "DallasSTGSF",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select9"
+				},
+				{
+					"name": "join8"
+				},
+				{
+					"name": "select10"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "join9"
+				},
+				{
+					"name": "select12"
+				},
+				{
+					"name": "join10"
+				},
+				{
+					"name": "select13"
+				},
+				{
+					"name": "join11"
+				},
+				{
+					"name": "select14"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "join12"
+				},
+				{
+					"name": "select15"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          BUISNESS_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          FACILITY_TYPE as string,",
+				"          SOURCE_CITY as string,",
+				"          LICENSE_NUMBER as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> bd",
+				"source(output(",
+				"          RISK_ID as decimal(38,0),",
+				"          RISK_DESC as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> rd",
+				"source(output(",
+				"          LOCATION_ID as decimal(38,0),",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as decimal(38,0),",
+				"          LATITUDE as string,",
+				"          LONGITUDE as string,",
+				"          LOCATION as string,",
+				"          STREET_NUMBER as string,",
+				"          STREET_NAME as string,",
+				"          STREET_TYPE as string,",
+				"          STREET_DIRECTION as string,",
+				"          STREET_UNIT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> ld",
+				"source(output(",
+				"          VIOLATION_ID as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESC as string,",
+				"          COMMENTS as string,",
+				"          SOURCE_CITY as string,",
+				"          VIOLATION_POINTS as string,",
+				"          LICENSE_NUMBER as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> vd",
+				"source(output(",
+				"          DATE_ID as decimal(18,0),",
+				"          DT as date,",
+				"          DAY as decimal(2,0),",
+				"          MONTH as decimal(2,0),",
+				"          MONTH_NAME as string,",
+				"          YEAR as decimal(4,0),",
+				"          QUARTER as decimal(2,0),",
+				"          WEEK as decimal(2,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> dd",
+				"source(output(",
+				"          INSPECTION_SK as decimal(38,0),",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          INSPECTION_TYPE as string,",
+				"          INSPECTION_DATE as string,",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSP_RESULT as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> id",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          INSPECTION_ID as string,",
+				"          RESTAURANTNAME as string,",
+				"          INSPECTIONTYPE as string,",
+				"          INSPECTIONDATE as string,",
+				"          INSPECTIONSCORE as string,",
+				"          STREETNUMBER as string,",
+				"          STREETNAME as string,",
+				"          STREETDIRECTION as string,",
+				"          STREETTYPE as string,",
+				"          STREETUNIT as string,",
+				"          STREETADDRESS as string,",
+				"          ZIPCODE as string,",
+				"          INSPECTIONMONTH as string,",
+				"          INSPECTIONYEAR as string,",
+				"          LATLONGLOCATION as string,",
+				"          VIOLATIONS as string,",
+				"          COMMENTS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source1",
+				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
+				"source1 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          RESTAURANTNAME,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          VIOLATIONS,",
+				"          STREETADDRESS,",
+				"          STREETNUMBER,",
+				"          ZIPCODE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select9",
+				"select9, bd join(RESTAURANTNAME == DBA_NAME,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join8",
+				"join8 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER,",
+				"          STREETADDRESS,",
+				"          ZIPCODE,",
+				"          STREETNUMBER",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select10",
+				"select10 derive(INSPECTIONDATE = toString(toDate(INSPECTIONDATE, 'yyyy-MM-dd'), 'MM/dd/yyyy')) ~> derivedColumn3",
+				"derivedColumn3, ld join(STREETADDRESS == ADDRESS,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join9",
+				"join9 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER,",
+				"          LOCATION_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select12",
+				"select12, derivedColumn2 join(INSPECTIONDATE == DT,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join10",
+				"join10 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          INSPECTIONDATE,",
+				"          INSPECTIONSCORE,",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER,",
+				"          LOCATION_ID,",
+				"          DATE_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select13",
+				"select13, id join(INSPECTIONDATE == INSPECTION_DATE,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join11",
+				"join11 select(mapColumn(",
+				"          BUISNESS_ID,",
+				"          LICENSE_NUMBER,",
+				"          LOCATION_ID,",
+				"          DATE_ID,",
+				"          INSPECTION_SK,",
+				"          INSPECTION_SCORE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select14",
+				"select14 derive(RISK_ID = toInteger(0),",
+				"          SOURCE_CITY = 'Dallas') ~> derivedColumn4",
+				"derivedColumn4, vd join(derivedColumn4@SOURCE_CITY == vd@SOURCE_CITY,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join12",
+				"join12 select(mapColumn(",
+				"          BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          DATE_ID,",
+				"          INSPECTION_SK,",
+				"          INSPECTION_SCORE,",
+				"          RISK_ID,",
+				"          VIOLATION_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select15"
+			]
+		}
+	}
+}
