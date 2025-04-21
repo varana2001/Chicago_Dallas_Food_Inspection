@@ -93,10 +93,10 @@
 					"name": "derivedColumn4"
 				},
 				{
-					"name": "join12"
+					"name": "select15"
 				},
 				{
-					"name": "select15"
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -273,12 +273,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select14",
 				"select14 derive(RISK_ID = toInteger(0)) ~> derivedColumn4",
-				"derivedColumn4, vd join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join12",
-				"join12 select(mapColumn(",
+				"aggregate1 select(mapColumn(",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
 				"          DATE_ID,",
@@ -288,7 +283,15 @@
 				"          VIOLATION_ID",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select15"
+				"     skipDuplicateMapOutputs: true) ~> select15",
+				"derivedColumn4 aggregate(groupBy(LICENSE_NUMBER),",
+				"     LICENSE_NUMBER1 = first(LICENSE_NUMBER),",
+				"          BUISNESS_ID = first(BUISNESS_ID),",
+				"          LOCATION_ID = first(LOCATION_ID),",
+				"          INSPECTION_SK = first(INSPECTION_SK),",
+				"          INSPECTION_SCORE = first(INSPECTION_SCORE),",
+				"          DATE_ID = first(DATE_ID),",
+				"          RISK_ID = first(RISK_ID)) ~> aggregate1"
 			]
 		}
 	}
