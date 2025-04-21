@@ -1,5 +1,5 @@
 {
-	"name": "dataflow3_copy1",
+	"name": "dataflow3_copy2",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -38,6 +38,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "location"
+				},
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTable6",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -91,6 +98,24 @@
 				},
 				{
 					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "window5"
+				},
+				{
+					"name": "filter4"
+				},
+				{
+					"name": "window6"
+				},
+				{
+					"name": "filter5"
 				}
 			],
 			"scriptLines": [
@@ -156,16 +181,30 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> location",
+				"source(output(",
+				"          DATE_ID as decimal(18,0),",
+				"          DT as date,",
+				"          DAY as decimal(2,0),",
+				"          MONTH as decimal(2,0),",
+				"          MONTH_NAME as string,",
+				"          YEAR as decimal(4,0),",
+				"          QUARTER as decimal(2,0),",
+				"          WEEK as decimal(2,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> source1",
 				"ins, business join(ins@LICENSE_NUMBER == business@LICENSE_NUMBER,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 aggregate(groupBy(INSPECTION_ID,",
+				"join5 aggregate(groupBy(INSPECTION_ID,",
 				"          ins@LICENSE_NUMBER,",
 				"          INSPECTION_DATE,",
 				"          INSPECTION_SCORE,",
-				"          INSP_RESULT),",
+				"          INSP_RESULT,",
+				"          DATE_ID),",
 				"     b_id = first(BUISNESS_ID)) ~> aggregate1",
 				"aggregate1 window(over(LICENSE_NUMBER),",
 				"     asc(INSPECTION_ID, true),",
@@ -174,7 +213,10 @@
 				"filter1 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          LICENSE_NUMBER,",
-				"          b_id",
+				"          b_id,",
+				"          DATE_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
@@ -183,11 +225,14 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2 select(mapColumn(",
+				"filter5 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          LICENSE_NUMBER = select1@LICENSE_NUMBER,",
 				"          b_id,",
-				"          VIOLATION_ID",
+				"          VIOLATION_ID = rank_,",
+				"          DATE_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
@@ -214,7 +259,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"join4 select(mapColumn(",
+				"filter4 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          b_id,",
 				"          VIOLATION_ID,",
@@ -227,6 +272,20 @@
 				"select4 keyGenerate(output(sk as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
+				"source1 derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn1",
+				"join1, derivedColumn1 join(INSPECTION_DATE == DT,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join4 window(over({join4.LICENSE_NUMBER} = select3@LICENSE_NUMBER),",
+				"     asc(VIOLATION_ID, true),",
+				"     rank3 = rank()) ~> window5",
+				"window5 filter(rank3==1) ~> filter4",
+				"join2 window(over({join2.LICENSE_NUMBER} = select1@LICENSE_NUMBER),",
+				"     asc(VIOLATION_ID, true),",
+				"     rank_ = rank()) ~> window6",
+				"window6 filter(rank_ == 1) ~> filter5",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
