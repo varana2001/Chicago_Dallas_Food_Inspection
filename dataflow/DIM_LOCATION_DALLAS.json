@@ -48,13 +48,16 @@
 					"name": "aggregate1"
 				},
 				{
-					"name": "surrogateKey1"
-				},
-				{
-					"name": "select5"
-				},
-				{
 					"name": "join1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -167,33 +170,19 @@
 				"          STREET_UNIT,",
 				"          LOCATION),",
 				"     NAME = first(RESTRAURANT_NAME)) ~> aggregate1",
-				"select3 keyGenerate(output(LOCATION_ID as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"join1 select(mapColumn(",
-				"          ADDRESS,",
-				"          CITY,",
-				"          STATE,",
-				"          ZIP,",
-				"          LATITUDE,",
-				"          LONGITUDE,",
-				"          LOCATION,",
-				"          STREET_NUMBER,",
-				"          STREET_NAME,",
-				"          STREET_TYPE,",
-				"          STREET_DIRECTION,",
-				"          STREET_UNIT,",
-				"          LOCATION_ID,",
-				"          LICENSE_NUMBER",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select5",
-				"surrogateKey1, source1 join(NAME == DBA_NAME,",
+				"select3, source1 join(NAME == DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"select5 sink(allowSchemaDrift: true,",
+				"join1 window(over(NAME),",
+				"     asc(LOCATION, true),",
+				"     RANKNAME = rank()) ~> window1",
+				"window1 filter(RANKNAME == 1) ~> filter1",
+				"filter1 keyGenerate(output(sk as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          LOCATION_ID as decimal(38,0),",
@@ -220,7 +209,7 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     stageInsert: true,",
 				"     mapColumn(",
-				"          LOCATION_ID,",
+				"          LOCATION_ID = sk,",
 				"          ADDRESS,",
 				"          CITY,",
 				"          STATE,",
