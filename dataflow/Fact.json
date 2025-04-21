@@ -87,9 +87,6 @@
 					"name": "join5"
 				},
 				{
-					"name": "join6"
-				},
-				{
 					"name": "select2"
 				},
 				{
@@ -136,6 +133,9 @@
 				},
 				{
 					"name": "aggregate3"
+				},
+				{
+					"name": "join9"
 				}
 			],
 			"scriptLines": [
@@ -285,11 +285,6 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"select5, vd join(select5@LICENSE_NUMBER == vd@LICENSE_NUMBER,",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join6",
 				"chicagostg select(mapColumn(",
 				"          LICENSE_NUMBER,",
 				"          RISK,",
@@ -298,7 +293,8 @@
 				"          RESULTS,",
 				"          VIOLATION_DESC,",
 				"          DBA_NAME,",
-				"          COMMENTS",
+				"          COMMENTS,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
@@ -306,7 +302,7 @@
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
 				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
-				"join6 select(mapColumn(",
+				"join9 select(mapColumn(",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
 				"          DATE_ID,",
@@ -325,7 +321,8 @@
 				"          VIOLATION_DESC,",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
-				"          DATE_ID",
+				"          DATE_ID,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
@@ -337,7 +334,8 @@
 				"          DATE_ID,",
 				"          RISK_ID,",
 				"          INSPECTION_SK,",
-				"          INSPECTION_SCORE",
+				"          INSPECTION_SCORE,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select5",
@@ -347,7 +345,8 @@
 				"          VIOLATION_DESC,",
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
-				"          LICENSE_NUMBER",
+				"          LICENSE_NUMBER,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select6",
@@ -357,7 +356,8 @@
 				"          INSPECTION_DATE,",
 				"          VIOLATION_DESC,",
 				"          BUISNESS_ID,",
-				"          LICENSE_NUMBER = bd@LICENSE_NUMBER",
+				"          LICENSE_NUMBER = bd@LICENSE_NUMBER,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select7",
@@ -368,7 +368,8 @@
 				"          BUISNESS_ID,",
 				"          LOCATION_ID,",
 				"          DATE_ID,",
-				"          RISK_ID",
+				"          RISK_ID,",
+				"          VIOLATION_CODE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select8",
@@ -423,6 +424,11 @@
 				"          INSPECTION_SK,",
 				"          FACT_SK),",
 				"     LICENSE_NUMBER = first(LICENSE_NUMBER)) ~> aggregate3",
+				"select5, vd join(select5@VIOLATION_CODE == vd@VIOLATION_CODE,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'right')~> join9",
 				"aggregate3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
