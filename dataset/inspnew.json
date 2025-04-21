@@ -1,0 +1,53 @@
+{
+	"name": "inspnew",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "foodinsp",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "INSPECTION_SK",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTION_DATE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTION_SCORE",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LICENSE_NUMBER",
+				"type": "NUMBER",
+				"precision": 15,
+				"scale": 0
+			},
+			{
+				"name": "INSP_RESULT",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "INSPECTION"
+		}
+	}
+}
