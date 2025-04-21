@@ -96,9 +96,6 @@
 					"name": "surrogateKey1"
 				},
 				{
-					"name": "aggregate1"
-				},
-				{
 					"name": "derivedColumn2"
 				},
 				{
@@ -136,6 +133,9 @@
 				},
 				{
 					"name": "aggregate2"
+				},
+				{
+					"name": "aggregate3"
 				}
 			],
 			"scriptLines": [
@@ -260,7 +260,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> source1",
-				"aggregate1, bd join(aggregate1@DBA_NAME == bd@DBA_NAME,",
+				"select2, bd join(select2@DBA_NAME == bd@DBA_NAME,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -285,7 +285,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"select5, vd join(select5@VIOLATION_DESC == vd@VIOLATION_DESC,",
+				"select5, vd join(select5@LICENSE_NUMBER == vd@LICENSE_NUMBER,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -305,13 +305,6 @@
 				"select3 keyGenerate(output(FACT_SK as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"select2 aggregate(groupBy(ADDRESS,",
-				"          RESULTS),",
-				"     LICENSE_NUMBER = first(LICENSE_NUMBER),",
-				"          INSPECTION_DATE = first(INSPECTION_DATE),",
-				"          VIOLATION_DESC = first(VIOLATION_DESC),",
-				"          DBA_NAME = first(DBA_NAME),",
-				"          COMMENTS = first(COMMENTS)) ~> aggregate1",
 				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
 				"join6 select(mapColumn(",
 				"          BUISNESS_ID,",
@@ -321,7 +314,7 @@
 				"          RISK_ID,",
 				"          INSPECTION_SK,",
 				"          INSPECTION_SCORE,",
-				"          LICENSE_NUMBER = select5@LICENSE_NUMBER",
+				"          LICENSE_NUMBER = vd@LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
@@ -401,7 +394,8 @@
 				"          INSPECTIONDATE,",
 				"          INSPECTIONSCORE,",
 				"          BUISNESS_ID,",
-				"          DBA_NAME",
+				"          DBA_NAME,",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select10",
@@ -413,13 +407,23 @@
 				"          INSPECTIONDATE,",
 				"          INSPECTIONSCORE,",
 				"          BUISNESS_ID,",
-				"          DBA_NAME",
+				"          DBA_NAME,",
+				"          LICENSE_NUMBER",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select11",
-				"select11 aggregate(groupBy(BUISNESS_ID),",
+				"select11 aggregate(groupBy(RESTAURANTNAME),",
 				"     DBA_NAME = first(DBA_NAME)) ~> aggregate2",
-				"surrogateKey1 sink(allowSchemaDrift: true,",
+				"surrogateKey1 aggregate(groupBy(BUISNESS_ID,",
+				"          LOCATION_ID,",
+				"          DATE_ID,",
+				"          RISK_ID,",
+				"          VIOLATION_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSPECTION_SK,",
+				"          FACT_SK),",
+				"     LICENSE_NUMBER = first(LICENSE_NUMBER)) ~> aggregate3",
+				"aggregate3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          FACT_SK as decimal(38,0),",
