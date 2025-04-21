@@ -93,6 +93,9 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -205,7 +208,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"join2, dd join(INSPECTION_DATE == DT,",
+				"join2, derivedColumn2 join(INSPECTION_DATE == DT,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -257,6 +260,7 @@
 				"          INSPECTION_DATE = first(INSPECTION_DATE),",
 				"          VIOLATION_DESC = first(VIOLATION_DESC),",
 				"          DBA_NAME = first(DBA_NAME)) ~> aggregate1",
+				"dd derive(DT = toString(DT, 'MM/dd/yyyy')) ~> derivedColumn2",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
