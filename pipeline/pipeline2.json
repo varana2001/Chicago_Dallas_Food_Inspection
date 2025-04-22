@@ -18,7 +18,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow1",
+						"referenceName": "Inspection",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow2",
+						"referenceName": "inspection_dallas",
 						"type": "DataFlowReference"
 					},
 					"compute": {

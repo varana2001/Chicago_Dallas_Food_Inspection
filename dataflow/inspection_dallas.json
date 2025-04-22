@@ -1,5 +1,5 @@
 {
-	"name": "dataflow2",
+	"name": "inspection_dallas",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
