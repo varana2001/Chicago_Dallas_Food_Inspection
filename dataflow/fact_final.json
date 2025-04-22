@@ -50,7 +50,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "SnowflakeTable7",
+						"referenceName": "SnowflakeTable8",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -329,6 +329,7 @@
 				"          VIOLATION_ID as decimal(38,0),",
 				"          BUISNESS_ID as decimal(38,0),",
 				"          RISK_ID as decimal(38,0),",
+				"          DATE_ID as string,",
 				"          INSPECTION_SCORE as decimal(38,0),",
 				"          INSPECTION_RESULT as string,",
 				"          LICENSE_NUMBER as decimal(15,0)",
@@ -350,7 +351,8 @@
 				"          RISK_ID,",
 				"          LICENSE_NUMBER,",
 				"          INSPECTION_SCORE,",
-				"          INSPECTION_RESULT = INSP_RESULT",
+				"          INSPECTION_RESULT = INSP_RESULT,",
+				"          DATE_ID",
 				"     )) ~> sink1"
 			]
 		}
