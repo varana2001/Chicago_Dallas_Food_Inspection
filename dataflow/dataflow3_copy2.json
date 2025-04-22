@@ -50,7 +50,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "factt",
+						"referenceName": "SnowflakeTable7",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -116,6 +116,12 @@
 				},
 				{
 					"name": "filter5"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "aggregate2"
 				}
 			],
 			"scriptLines": [
@@ -229,7 +235,7 @@
 				"          INSPECTION_ID,",
 				"          LICENSE_NUMBER = select1@LICENSE_NUMBER,",
 				"          b_id,",
-				"          VIOLATION_ID = rank_,",
+				"          VIOLATION_ID,",
 				"          DATE_ID,",
 				"          INSPECTION_SCORE,",
 				"          INSP_RESULT",
@@ -246,7 +252,10 @@
 				"          b_id,",
 				"          VIOLATION_ID,",
 				"          LOCATION_ID,",
-				"          LICENSE_NUMBER = location@LICENSE_NUMBER",
+				"          LICENSE_NUMBER = location@LICENSE_NUMBER,",
+				"          DATE_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
@@ -254,18 +263,21 @@
 				"     asc(LOCATION_ID, true),",
 				"     rank2 = rank()) ~> window4",
 				"window4 filter(rank2 == 1) ~> filter3",
-				"filter3, risk join(select3@LICENSE_NUMBER == risk@LICENSE_NUMBER,",
+				"select5, risk join(select5@LICENSE_NUMBER == risk@LICENSE_NUMBER,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"filter4 select(mapColumn(",
+				"aggregate2 select(mapColumn(",
 				"          INSPECTION_ID,",
 				"          b_id,",
-				"          VIOLATION_ID,",
+				"          VIOLATION_ID = LICENSE_NUMBER,",
 				"          LOCATION_ID,",
 				"          RISK_ID,",
-				"          LICENSE_NUMBER = risk@LICENSE_NUMBER",
+				"          LICENSE_NUMBER = number,",
+				"          DATE_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
@@ -278,7 +290,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"join4 window(over({join4.LICENSE_NUMBER} = select3@LICENSE_NUMBER),",
+				"join4 window(over({join4.LICENSE_NUMBER} = risk@LICENSE_NUMBER),",
 				"     asc(VIOLATION_ID, true),",
 				"     rank3 = rank()) ~> window5",
 				"window5 filter(rank3==1) ~> filter4",
@@ -286,6 +298,28 @@
 				"     asc(VIOLATION_ID, true),",
 				"     rank_ = rank()) ~> window6",
 				"window6 filter(rank_ == 1) ~> filter5",
+				"filter3 select(mapColumn(",
+				"          INSPECTION_ID,",
+				"          b_id,",
+				"          VIOLATION_ID,",
+				"          LOCATION_ID,",
+				"          LICENSE_NUMBER,",
+				"          DATE_ID,",
+				"          INSPECTION_SCORE,",
+				"          INSP_RESULT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"filter4 aggregate(groupBy(select5@LICENSE_NUMBER,",
+				"          INSPECTION_ID,",
+				"          b_id,",
+				"          LOCATION_ID,",
+				"          VIOLATION_ID,",
+				"          DATE_ID,",
+				"          INSP_RESULT,",
+				"          INSPECTION_SCORE,",
+				"          RISK_ID),",
+				"     number = first(select5@LICENSE_NUMBER)) ~> aggregate2",
 				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -295,6 +329,8 @@
 				"          VIOLATION_ID as decimal(38,0),",
 				"          BUISNESS_ID as decimal(38,0),",
 				"          RISK_ID as decimal(38,0),",
+				"          INSPECTION_SCORE as decimal(38,0),",
+				"          INSPECTION_RESULT as string,",
 				"          LICENSE_NUMBER as decimal(15,0)",
 				"     ),",
 				"     deletable:false,",
@@ -312,7 +348,9 @@
 				"          VIOLATION_ID,",
 				"          BUISNESS_ID = b_id,",
 				"          RISK_ID,",
-				"          LICENSE_NUMBER",
+				"          LICENSE_NUMBER,",
+				"          INSPECTION_SCORE,",
+				"          INSPECTION_RESULT = INSP_RESULT",
 				"     )) ~> sink1"
 			]
 		}

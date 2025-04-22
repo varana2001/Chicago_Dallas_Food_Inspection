@@ -1,0 +1,69 @@
+{
+	"name": "SnowflakeTable7",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SnowflakeLs",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "FACT_SK",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LOCATION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "VIOLATION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "BUISNESS_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "RISK_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_SCORE",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "INSPECTION_RESULT",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUMBER",
+				"type": "NUMBER",
+				"precision": 15,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "FOOD_SCHEMA",
+			"table": "FACT_INSP2"
+		}
+	}
+}
